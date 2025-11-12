@@ -3,6 +3,7 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import Home from '../views/Home'
 import Personas from '../views/Personas' // ✅ agregado
 import Servicios from '../views/Servicios'
+import DDJJ from '../views/DDJJ'
 import Licencias from '../views/Licencias'
 import AuthUsers from '../views/AuthUsers'
 import Login from '../views/Login'
@@ -42,6 +43,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/ddjj" element={<ProtectedRoute><DashboardLayout><DDJJ /></DashboardLayout></ProtectedRoute>} />
       <Route
         path="/licencias"
         element={

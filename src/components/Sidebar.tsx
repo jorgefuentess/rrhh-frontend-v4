@@ -2,6 +2,7 @@ import { List, ListItemButton, ListItemIcon, ListItemText, Box, Typography } fro
 import HomeIcon from '@mui/icons-material/Home'
 import GroupIcon from '@mui/icons-material/Group'
 import WorkHistoryIcon from '@mui/icons-material/WorkHistory'
+import DescriptionIcon from '@mui/icons-material/Description'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import SecurityIcon from '@mui/icons-material/Security'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -14,6 +15,7 @@ export default function Sidebar() {
     { text: 'Inicio', icon: <HomeIcon />, path: '/' },
     { text: 'Usuarios', icon: <GroupIcon />, path: '/usuarios' },
     { text: 'Servicios', icon: <WorkHistoryIcon />, path: '/servicios' },
+    { text: 'DDJJ', icon: <DescriptionIcon />, path: '/ddjj' },
     { text: 'Licencias', icon: <CalendarMonthIcon />, path: '/licencias' },
     { text: 'Usuarios Sistema', icon: <SecurityIcon />, path: '/authusers' },
   ]

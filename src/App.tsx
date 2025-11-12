@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Home from './views/Home'
 import Servicios from './views/Servicios'
+import DDJJ from './views/DDJJ'
 import Usuarios from './views/Users'
 import Licencias from './views/Licencias'
 import AuthUsers from './views/AuthUsers'
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/personas" element={<Personas />} /> {/* 👈 nueva ruta */}
           <Route path="/servicios" element={<Servicios />} />
+          <Route path="/ddjj" element={<DDJJ />} />
           <Route path="/licencias" element={<Licencias />} />
           <Route path="/authusers" element={<AuthUsers />} />
         </Routes>

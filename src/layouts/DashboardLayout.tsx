@@ -22,6 +22,7 @@ import {
   WorkHistory,
   CalendarMonth,
   Security,
+  Description as DescriptionIcon,
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
   DarkMode,
@@ -53,6 +54,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
     { text: 'Inicio', icon: <Home />, path: '/' },
     { text: 'Personas', icon: <Group />, path: '/personas' }, // ✅ actualizado
     { text: 'Servicios', icon: <WorkHistory />, path: '/servicios' },
+    { text: 'DDJJ', icon: <DescriptionIcon />, path: '/ddjj' },
     { text: 'Licencias', icon: <CalendarMonth />, path: '/licencias' },
     { text: 'Usuarios Sistema', icon: <Security />, path: '/auth-users', adminOnly: true },
   ]
