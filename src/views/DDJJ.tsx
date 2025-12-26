@@ -63,7 +63,7 @@ export default function DDJJView() {
       field: 'persona',
       headerName: 'Persona',
       flex: 1.5,
-      valueGetter: (p) => `${p.row.persona?.apellido || ''} ${p.row.persona?.nombre || ''}`,
+      valueGetter: (p) => `${p.row.user?.apellido || ''} ${p.row.user?.nombre || ''}`,
     },
     { field: 'cargosHsPrivados', headerName: 'Hs. Privados', flex: 1 },
     { field: 'cargosHsPublicos', headerName: 'Hs. Públicos', flex: 1 },

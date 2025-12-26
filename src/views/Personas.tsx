@@ -29,7 +29,8 @@ type Persona = {
   fechaInicioActividad?: string
   titulacion?: string
   pensiones: boolean
-  embargo: boolean
+  embargo: boolean,
+  telefonoCelular?:string
 }
 
 export default function Personas() {
@@ -69,7 +70,7 @@ export default function Personas() {
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'dni', headerName: 'DNI', flex: 0.8 },
     { field: 'cuil', headerName: 'CUIL', flex: 1 },
-    { field: 'telefono', headerName: 'Teléfono', flex: 1 },
+    { field: 'telefonoCelular', headerName: 'Teléfonos', flex: 1 },
     { field: 'email', headerName: 'Email', flex: 1.3 },
     { field: 'obraSocial', headerName: 'Obra Social', flex: 1 },
     { field: 'sexo', headerName: 'Sexo', flex: 0.8 },

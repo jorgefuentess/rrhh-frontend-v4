@@ -63,6 +63,7 @@ export default function Servicios() {
     ])
     setRows(servi.data)
     setUsers(u.data)
+    
     setNiveles(ns.data)
     setSecciones(ss.data)
     setMaterias(ms.data)
