@@ -57,6 +57,10 @@ export default function MiLicencia() {
   const [tipoLicencia, setTipoLicencia] = useState<any[]>([]);
   const [toast, setToast] = useState("");
   const [open, setOpen] = useState(false);
+  // archivo
+  const [openn, setOpenn] = useState(false);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [mimeType, setMimeType] = useState<string | null>(null);
 
   const load = async () => {
     const [milics, u, tl] = await Promise.all([
@@ -66,7 +70,7 @@ export default function MiLicencia() {
     ]);
     console.log(milics.data);
     setRows(milics.data);
-    console.log("milicencia",milics.data)
+    console.log("milicencia", milics.data);
     setUsers(u.data);
     setTipoLicencia(tl.data);
   };
@@ -74,41 +78,70 @@ export default function MiLicencia() {
     load();
   }, []);
 
-const onSubmit = async (data: any) => {
-  const formData = new FormData();
+  const onSubmit = async (data: any) => {
+    const formData = new FormData();
 
-  formData.append("userId", data.user.id); // o userId si lo preferís
-  formData.append("tipo", data.tipo.id);
-  formData.append("fechaInicio", data.fechaInicio);
-  formData.append("fechaFin", data.fechaFin);
-  formData.append("observaciones", data.observaciones || "");
+    formData.append("userId", data.user.id); // o userId si lo preferís
+    formData.append("tipo", data.tipo.id);
+    formData.append("fechaInicio", data.fechaInicio);
+    formData.append("fechaFin", data.fechaFin);
+    formData.append("observaciones", data.observaciones || "");
 
-  if (data.archivo?.length > 0) {
-    formData.append("archivo", data.archivo[0]);
-  }
+    if (data.archivo?.length > 0) {
+      formData.append("archivo", data.archivo[0]);
+    }
 
-  console.log("formData listo");
+    console.log("formData listo");
 
-  await api.post("/milicencias", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    await api.post("/milicencias", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-  setToast("Licencia creada correctamente");
-  setOpen(false);
-  reset();
-  load();
-};
-
-  const handleView = (row: any) => {
-    console.log("Ver:", row);
-    // abrir modal, navegar, etc
+    setToast("Licencia creada correctamente");
+    setOpen(false);
+    reset();
+    load();
   };
 
-  const handleDownload = (row: any) => {
-    console.log("Descargar:", row);
-    // lógica de descarga
+  const handleView = async (id: string) => {
+    const res = await api.post(
+      "/milicencias/view",
+      { id },
+      { responseType: "blob" },
+    );
+
+    const blob = new Blob([res.data], {
+      type: res.headers["content-type"],
+    });
+
+    const url = URL.createObjectURL(blob);
+    setFileUrl(url);
+    setOpen(true);
+  };
+
+  const handleDownload = async (id: string) => {
+    const response = await api.post(
+      "/milicencias/download",
+      { id },
+      { responseType: "blob" },
+    );
+
+    const blob = new Blob([response.data], {
+      type: response.headers["content-type"],
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "archivo"; // opcional
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
   };
 
   const columns = useMemo<GridColDef[]>(
@@ -124,8 +157,7 @@ const onSubmit = async (data: any) => {
         field: "tipo",
         headerName: "Tipo licencia",
         flex: 1.5,
-        valueGetter: (p) =>
-          `${p.row.tipo?.nombre || ""} `,
+        valueGetter: (p) => `${p.row.tipo?.nombre || ""} `,
       },
       { field: "fechaSistema", headerName: "Fecha Sistema", flex: 1 },
       // { field: 'fechaFin', headerName: 'Fin', flex: 1 },
@@ -144,7 +176,7 @@ const onSubmit = async (data: any) => {
               <IconButton
                 size="small"
                 color="primary"
-                onClick={() => handleView(params.row)}
+                onClick={() => handleView(params.row.id)}
               >
                 <VisibilityIcon />
               </IconButton>
@@ -154,7 +186,7 @@ const onSubmit = async (data: any) => {
               <IconButton
                 size="small"
                 color="success"
-                onClick={() => handleDownload(params.row)}
+                onClick={() => handleDownload(params.row.id)}
               >
                 <DownloadIcon />
               </IconButton>
@@ -163,7 +195,7 @@ const onSubmit = async (data: any) => {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -267,6 +299,58 @@ const onSubmit = async (data: any) => {
           <Button variant="contained" onClick={handleSubmit(onSubmit)}>
             Guardar
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Vista previa del archivo</DialogTitle>
+        <DialogContent
+          dividers
+          sx={{
+            height: 600,
+            overflow: "hidden", // 🔥 clave para quitar scroll
+          }}
+        >
+          {fileUrl && mimeType?.startsWith("image/") && (
+            <Box
+              sx={{
+                width: "50%",
+                height: "50%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#fafafa",
+              }}
+            >
+              <img
+                src={fileUrl}
+                alt="archivo"
+                style={{
+                  maxWidth: "50%",
+                  maxHeight: "50%",
+                  objectFit: "contain", // 🔥 se ve completa
+                }}
+              />
+            </Box>
+          )}
+
+          {fileUrl && !mimeType?.startsWith("image/") && (
+            <object
+              data={fileUrl}
+              type={mimeType || "application/pdf"}
+              width="100%"
+              height="100%"
+            />
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
