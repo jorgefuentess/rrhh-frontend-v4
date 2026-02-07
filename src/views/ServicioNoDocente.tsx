@@ -79,7 +79,7 @@ export default function ServicioNoDocente() {
 
   const load = async () => {
     const [servi, u, ns, ss, ms] = await Promise.all([
-      api.get("/servicios"),
+      api.get("/servicionodocente"),
       api.get("/users"),
       api.get("/catalogos/nivel"),
       api.get("/catalogos/seccion"),
@@ -128,7 +128,7 @@ export default function ServicioNoDocente() {
       caracter: data.caracter,
       fechaToma: data.fechaToma,
     };
-    await api.post("/servicios", body);
+    await api.post("/servicionodocente", body);
     setToast("Servicio creado correctamente");
     setOpen(false);
     reset();
@@ -143,29 +143,12 @@ export default function ServicioNoDocente() {
 
   const columns = useMemo<GridColDef[]>(
     () => [
-      {
-        field: "nivel",
-        headerName: "Nivel",
-        flex: 1,
-        valueGetter: (p) => p.row.nivel?.nombre || "",
-      },
-      {
-        field: "seccion",
-        headerName: "Sección",
-        flex: 1,
-        valueGetter: (p) => p.row.seccion?.nombre || "",
-      },
-      {
-        field: "materia",
-        headerName: "Materia",
-        flex: 1.2,
-        valueGetter: (p) => p.row.materia?.nombre || "",
-      },
+     
       { field: "codigoCargo", headerName: "Código", flex: 1 },
       { field: "cargo", headerName: "Cargo", flex: 1.4 },
-      { field: "puntos", headerName: "Puntos", flex: 0.8 },
+
       { field: "cantHs", headerName: "Hs", flex: 0.6 },
-      { field: "caracter", headerName: "Carácter", flex: 1 },
+ 
       {
         field: "actions",
         headerName: "Acciones",
