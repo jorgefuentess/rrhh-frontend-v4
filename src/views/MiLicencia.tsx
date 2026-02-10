@@ -37,6 +37,7 @@ type SimpleUser = { id: string; apellido: string; nombre: string };
 
 export default function MiLicencia() {
   const {
+    watch,
     register,
     handleSubmit,
     reset,
@@ -58,7 +59,7 @@ export default function MiLicencia() {
   const [toast, setToast] = useState("");
   const [open, setOpen] = useState(false);
   // archivo
-  const [openn, setOpenn] = useState(false);
+  const [openArchivo, setOpenArchivo] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string | null>(null);
 
@@ -68,18 +69,17 @@ export default function MiLicencia() {
       api.get("/users"),
       api.get("/tipoLicencia"),
     ]);
-    console.log(milics.data);
     setRows(milics.data);
-    console.log("milicencia", milics.data);
     setUsers(u.data);
     setTipoLicencia(tl.data);
   };
   useEffect(() => {
     load();
   }, []);
-
+const archivo = watch("archivo");
   const onSubmit = async (data: any) => {
     const formData = new FormData();
+    
 
     formData.append("userId", data.user.id); // o userId si lo preferís
     formData.append("tipo", data.tipo.id);
@@ -91,7 +91,6 @@ export default function MiLicencia() {
       formData.append("archivo", data.archivo[0]);
     }
 
-    console.log("formData listo");
 
     await api.post("/milicencias", formData, {
       headers: {
@@ -118,7 +117,7 @@ export default function MiLicencia() {
 
     const url = URL.createObjectURL(blob);
     setFileUrl(url);
-    setOpen(true);
+    setOpenArchivo(true);
   };
 
   const handleDownload = async (id: string) => {
@@ -290,8 +289,14 @@ export default function MiLicencia() {
             {/* SUBIR ARCHIVO */}
             <Button variant="outlined" component="label">
               Subir archivo
-              <input type="file" hidden {...register("archivo")} />
+              <input type="file"  accept="application/pdf,image/*" hidden {...register("archivo")} />
             </Button>
+           {/* Mostrar nombre del archivo */}
+           {archivo && archivo.length > 0 && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              📎 Archivo seleccionado: <strong>{archivo[0].name}</strong>
+            </Typography>
+)}
           </Box>
         </DialogContent>
         <DialogActions>
@@ -303,8 +308,8 @@ export default function MiLicencia() {
       </Dialog>
 
       <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
+        open={openArchivo}
+        onClose={() => setOpenArchivo(false)}
         maxWidth="md"
         fullWidth
       >
@@ -350,7 +355,7 @@ export default function MiLicencia() {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cerrar</Button>
+          <Button onClick={() => setOpenArchivo(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 

@@ -106,7 +106,6 @@ export default function Personas() {
     setOpen(true);
   };
   const onDelete = async (row: Persona) => {
-    console.log("id mandado",row.id)
     await api.delete(`/nodocente/${row.id}`);
     setToast("Persona eliminada correctamente");
     load();

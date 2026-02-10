@@ -15,7 +15,8 @@ type DDJJ = {
   id?: string
   persona: { id: string; apellido: string; nombre: string }
   cargosHsPrivados?: number
-  cargosHsPublicos?: number
+  cargosHsPublicos?: number,
+  escuela:{ id: string; apellido: string; nombre: string }
 }
 
 type Persona = { id: string; apellido: string; nombre: string }
@@ -24,19 +25,21 @@ export default function DDJJView() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DDJJ>()
   const [rows, setRows] = useState<DDJJ[]>([])
   const [personas, setPersonas] = useState<Persona[]>([])
+   const [escuelas, setEscuelas] = useState<any[]>([])
   const [toast, setToast] = useState<string>('')
   const [openForm, setOpenForm] = useState(false)
 
     const load = async () => {
     try {
-        const [ddjjRes, persRes] = await Promise.all([
-        api.get('/ddjj'),   // ✅ endpoint correcto según tu backend
-        api.get('/users'),  // ✅ Swagger muestra que /users devuelve las personas
+        const [ddjjRes, persRes,escRes] = await Promise.all([
+        api.get('/ddjj'),   
+        api.get('/users'),  
+        api.get('/escuela')
         ])
-        console.log('✅ Personas:', persRes.data)
-        console.log('✅ DDJJ:', ddjjRes.data)
+      
         setRows(ddjjRes.data)
         setPersonas(persRes.data)
+        setEscuelas(escRes.data)
     } catch (err) {
         console.error('❌ Error cargando DDJJ o Personas', err)
         setToast('No se pudo cargar DDJJ/personas')
@@ -111,6 +114,17 @@ export default function DDJJView() {
             >
               {personas.map(p => (
                 <MenuItem key={p.id} value={p.id}>{p.apellido}, {p.nombre}</MenuItem>
+              ))}
+            </TextField>
+              <TextField
+              select
+              label="Escuela"
+              {...register('escuela.id', { required: 'Requerido' })}
+              error={!!errors.escuela?.id}
+              helperText={errors.escuela?.id?.message}
+            >
+              {escuelas.map(e => (
+                <MenuItem key={e.id} value={e.id}> {e.nombre}</MenuItem>
               ))}
             </TextField>
 

@@ -86,15 +86,10 @@ export default function Servicios() {
       api.get("/catalogos/materia"),
     ]);
     setRows(servi.data);
-    console.log("servicio", servi.data);
     setUsers(u.data);
-    console.log("user", u.data);
     setNiveles(ns.data);
-    console.log("niveles", ns.data);
     setSecciones(ss.data);
-    console.log("secciones", ss.data);
     setMaterias(ms.data);
-    console.log("materias", ms.data);
   };
   useEffect(() => {
     load();
@@ -135,7 +130,6 @@ export default function Servicios() {
     load();
   };
   const onEdit = (row: any) => {
-    console.log("servicios", row);
     setEditing(row);
     reset({ ...row });
     setOpen(true);
