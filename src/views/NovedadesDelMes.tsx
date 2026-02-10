@@ -36,9 +36,10 @@ export default function NovedadesDelMes() {
 
   const load = async () => {
     const [lics, u] = await Promise.all([
-      api.get('/licencias'),
+      api.get('/novedad'),
       api.get('/users'),
     ])
+    console.log("datos novedad",lics.data)
     setRows(lics.data)
     setUsers(u.data)
   }
@@ -60,9 +61,8 @@ export default function NovedadesDelMes() {
   }
 
   const columns = useMemo<GridColDef[]>(() => [
-    { field: 'user', headerName: 'Usuario', flex: 1.5, valueGetter: (p) => `${p.row.user?.apellido || ''} ${p.row.user?.nombre || ''}` },
-    { field: 'tipo', headerName: 'Tipo', flex: 1 },
-    { field: 'fechaInicio', headerName: 'Inicio', flex: 1 },
+    { field: 'accion', headerName: 'Accion', flex: 1 },
+    { field: 'fechaSistema', headerName: 'Fecha', flex: 1 },
     { field: 'fechaFin', headerName: 'Fin', flex: 1 },
     { field: 'observaciones', headerName: 'Observaciones', flex: 1.5 },
   ], [])
