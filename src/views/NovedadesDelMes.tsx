@@ -95,7 +95,7 @@ export default function NovedadesDelMes() {
 
       {/* Modal de alta */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Nueva Licencia</DialogTitle>
+        {/* <DialogTitle>Nueva </DialogTitle> */}
         <DialogContent dividers>
           <Box component="form" sx={{ display: 'grid', gap: 2 }}>
             <TextField select label="Usuario" {...register('user.id', { required: 'Requerido' })} error={!!errors.user?.id}>
