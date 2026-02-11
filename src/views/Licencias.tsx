@@ -112,7 +112,14 @@ export default function Licencias() {
         valueGetter: (p) =>
           `${p.row.user?.apellido || ""} ${p.row.user?.nombre || ""}`,
       },
-      { field: "tipo", headerName: "Tipo", flex: 1 },
+      {
+        field: "tipo",
+        headerName: "Tipo Usuario",
+        flex: 1.5,
+        valueGetter: (p) =>
+          `${p.row.tipo?.descripcion}`,
+      },
+    
       { field: "fechaInicio", headerName: "Inicio", flex: 1 },
       { field: "fechaFin", headerName: "Fin", flex: 1 },
       { field: "observaciones", headerName: "Observaciones", flex: 1.5 },
