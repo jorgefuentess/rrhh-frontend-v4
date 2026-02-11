@@ -27,6 +27,11 @@ import {
   ChevronLeft as ChevronLeftIcon,
   DarkMode,
   LightMode,
+  AdminPanelSettings,
+  EventAvailable,
+  Person,
+  Assignment,
+  Notifications,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
@@ -58,14 +63,14 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
     { text: "Licencias", icon: <CalendarMonth />, path: "/licencias" },
     {
       text: "Usuarios Sistema",
-      icon: <Security />,
+      icon: <AdminPanelSettings />,
       path: "/auth-users",
       adminOnly: true,
     },
-    { text: "Mi Licencia", icon: <Security />, path: "/milicencia" },
-    { text: "No Docente", icon: <Security />, path: "/nodocente" },
-    { text: "Servicio No Docente", icon: <Security />, path: "/servicionodocente" },
-    { text: "Novedades del Mes", icon: <Security />, path: "/novedadesdelmes" },
+    { text: "Mi Licencia", icon: <EventAvailable />, path: "/milicencia" },
+    { text: "No Docente", icon: <Person />, path: "/nodocente" },
+    { text: "Servicio No Docente", icon: <Assignment />, path: "/servicionodocente" },
+    { text: "Novedades del Mes", icon: <Notifications />, path: "/novedadesdelmes" },
   ];
 
   return (
