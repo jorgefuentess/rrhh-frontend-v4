@@ -88,7 +88,7 @@ export default function Licencias() {
       const bodyNovedad = {
         licenciaId: licenciaCreada.id,
         accion: "CREACIÓN DE LICENCIA",
-        typo: "SERVICIO",
+        typo: "LICENCIA",
       };
 
       await api.post("/novedad", bodyNovedad);
