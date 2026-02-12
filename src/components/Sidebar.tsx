@@ -12,6 +12,11 @@ import WorkHistoryIcon from "@mui/icons-material/WorkHistory";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SecurityIcon from "@mui/icons-material/Security";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import PersonIcon from "@mui/icons-material/Person";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
@@ -24,11 +29,11 @@ export default function Sidebar() {
     { text: "Servicios", icon: <WorkHistoryIcon />, path: "/servicios" },
     { text: "DDJJ", icon: <DescriptionIcon />, path: "/ddjj" },
     { text: "Licencias", icon: <CalendarMonthIcon />, path: "/licencias" },
-    { text: "Usuarios Sistema", icon: <SecurityIcon />, path: "/authusers" },
-    { text: "Mi Licencia", icon: <SecurityIcon />, path: "/milicencia" },
-    { text: "No Docente", icon: <SecurityIcon />, path: "/nodocente" },
-    { text: "Servicio No Docente", icon: <SecurityIcon />, path: "/servicionodocente" },
-    { text: "Novedades del Mes", icon: <SecurityIcon />, path: "/novedadesdelmes" },
+    { text: "Usuarios Sistema", icon: <AdminPanelSettingsIcon />, path: "/authusers" },
+    { text: "Mi Licencia", icon: <EventAvailableIcon />, path: "/milicencia" },
+    { text: "No Docente", icon: <PersonIcon />, path: "/nodocente" },
+    { text: "Servicio No Docente", icon: <AssignmentIcon />, path: "/servicionodocente" },
+    { text: "Novedades del Mes", icon: <NotificationsIcon />, path: "/novedadesdelmes" },
   ];
 
   return (
