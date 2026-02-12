@@ -20,12 +20,16 @@ import PageHeader from "../components/PageHeader";
 import DataGridToolbarEnhanced from "../components/DataGridToolbarEnhanced";
 import ResponsiveDataGrid from "../components/ResponsiveDataGrid";
 
+/* =======================
+   TIPOS
+======================= */
+
 type Servicio = {
   id?: string;
   user: { id: string };
-  nivel: { id: number; nombre: string };
-  seccion?: { id: number; nombre: string };
-  materia?: { id: number; nombre: string };
+  nivel: { id: number; nombre?: string };
+  seccion?: { id: number; nombre?: string };
+  materia?: { id: number; nombre?: string };
   codigoCargo: string;
   cargo: string;
   puntos: number;
@@ -39,12 +43,16 @@ type CatSeccion = { id: number; nombre: string; nivel: { id: number } };
 type CatMateria = { id: number; nombre: string; seccion: { id: number } };
 type SimpleUser = { id: string; apellido: string; nombre: string };
 
+/* =======================
+   COMPONENTE
+======================= */
+
 export default function Servicios() {
-  const defaultValues: any = {
+  const defaultValues: Servicio = {
     user: { id: "" },
-    nivel: { id: 0, nombre: "" },
-    seccion: { id: 0, nombre: "" },
-    materia: { id: 0, nombre: "" },
+    nivel: { id: 0 },
+    seccion: { id: 0 },
+    materia: { id: 0 },
     codigoCargo: "",
     cargo: "",
     puntos: 0,
@@ -52,6 +60,7 @@ export default function Servicios() {
     caracter: "Interino",
     fechaToma: "",
   };
+
   const {
     register,
     handleSubmit,
@@ -60,55 +69,67 @@ export default function Servicios() {
     control,
     setValue,
     formState: { errors },
-  } = useForm<Servicio>({
-    defaultValues,
-  });
+  } = useForm<Servicio>({ defaultValues });
 
   const [rows, setRows] = useState<Servicio[]>([]);
-  const [toast, setToast] = useState("");
-  const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<SimpleUser[]>([]);
   const [niveles, setNiveles] = useState<CatNivel[]>([]);
   const [secciones, setSecciones] = useState<CatSeccion[]>([]);
   const [materias, setMaterias] = useState<CatMateria[]>([]);
-
-  const [editing, setEditing] = useState<any | null>(null);
+  const [toast, setToast] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Servicio | null>(null);
 
   const nivelSel = watch("nivel.id");
   const seccionSel = watch("seccion.id");
 
+  /* =======================
+     LOAD DATA
+  ======================= */
+
   const load = async () => {
-    const [servi, u, ns, ss, ms] = await Promise.all([
+    const [serv, u, n, s, m] = await Promise.all([
       api.get("/servicios"),
       api.get("/users"),
       api.get("/catalogos/nivel"),
       api.get("/catalogos/seccion"),
       api.get("/catalogos/materia"),
     ]);
-    setRows(servi.data);
+    setRows(serv.data);
     setUsers(u.data);
-    setNiveles(ns.data);
-    setSecciones(ss.data);
-    setMaterias(ms.data);
+    setNiveles(n.data);
+    setSecciones(s.data);
+    setMaterias(m.data);
   };
+
   useEffect(() => {
     load();
   }, []);
+
+  /* =======================
+     SELECTS ENCADENADOS
+  ======================= */
 
   useEffect(() => {
     setValue("seccion.id", 0);
     setValue("materia.id", 0);
   }, [nivelSel]);
+
   useEffect(() => {
     setValue("materia.id", 0);
   }, [seccionSel]);
 
   const filteredSecciones = secciones.filter(
-    (s) => String(s.nivel?.id) === String(nivelSel)
+    (s) => s.nivel.id === Number(nivelSel),
   );
+
   const filteredMaterias = materias.filter(
-    (m) => String(m.seccion?.id) === String(seccionSel)
+    (m) => m.seccion.id === Number(seccionSel),
   );
+
+  /* =======================
+     SUBMIT
+  ======================= */
 
   const onSubmit = async (data: Servicio) => {
     const body = {
@@ -123,17 +144,60 @@ export default function Servicios() {
       caracter: data.caracter,
       fechaToma: data.fechaToma,
     };
-    await api.post("/servicios", body);
-    setToast("Servicio creado correctamente");
+
+    if (editing?.id) {
+      // await api.put(`/servicios/${editing.id}`, body);
+
+      // 1️⃣ Crear licencia
+      const servicioResponse = await api.put(`/servicios/${editing.id}`, body);
+
+      console.log("licencia creada", servicioResponse);
+      const servicioCreada = servicioResponse.data;
+
+      // 2️⃣ Crear novedad con el id de la licencia
+      const bodyNovedad = {
+        licenciaId: servicioCreada.id,
+        accion: "EDICION DE SERVICIO",
+        typo: "SERVICIO",
+      };
+      console.log("body para mandar", bodyNovedad);
+      await api.post("/novedad", bodyNovedad);
+      setToast("Servicio actualizado correctamente");
+    } else {
+      await api.post("/servicios", body);
+      setToast("Servicio creado correctamente");
+    }
+
     setOpen(false);
-    reset();
+    setEditing(null);
+    reset(defaultValues);
     load();
   };
-  const onEdit = (row: any) => {
+
+  /* =======================
+     EDITAR
+  ======================= */
+
+  const onEdit = (row: Servicio) => {
     setEditing(row);
-    reset({ ...row });
+    reset({
+      user: { id: row.user.id },
+      nivel: { id: row.nivel.id },
+      seccion: row.seccion ? { id: row.seccion.id } : { id: 0 },
+      materia: row.materia ? { id: row.materia.id } : { id: 0 },
+      codigoCargo: row.codigoCargo,
+      cargo: row.cargo,
+      puntos: row.puntos,
+      cantHs: row.cantHs,
+      caracter: row.caracter,
+      fechaToma: row.fechaToma,
+    });
     setOpen(true);
   };
+
+  /* =======================
+     COLUMNAS
+  ======================= */
 
   const columns = useMemo<GridColDef[]>(
     () => [
@@ -163,32 +227,24 @@ export default function Servicios() {
       {
         field: "actions",
         headerName: "Acciones",
-        width: 220,
-        sortable: false,
+        width: 160,
         renderCell: (params) => (
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => onEdit(params.row)}
-            >
-              Editar
-            </Button>
-            {/*     
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  onClick={() => onDelete(params.row)}
-                >
-                  Eliminar
-                </Button> */}
-          </div>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => onEdit(params.row)}
+          >
+            Editar
+          </Button>
         ),
       },
     ],
-    []
+    [],
   );
+
+  /* =======================
+     RENDER
+  ======================= */
 
   return (
     <Grid container spacing={2}>
@@ -198,16 +254,8 @@ export default function Servicios() {
 
       <Grid item xs={12}>
         <SectionCard>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h6" fontWeight={600}>
-              Listado
-            </Typography>
+          <Box display="flex" justifyContent="space-between">
+            <Typography variant="h6">Listado</Typography>
             <Button
               variant="contained"
               onClick={() => {
@@ -216,67 +264,43 @@ export default function Servicios() {
                 setOpen(true);
               }}
             >
-              Nueva Servicio
-            </Button>
-            {/* <Button variant="contained" onClick={() => setOpen(true)}>
               Nuevo Servicio
-            </Button> */}
+            </Button>
           </Box>
 
-          <Box sx={{ mt: 2 }}>
+          <Box mt={2}>
             <ResponsiveDataGrid
-              fill
               rows={rows.map((r, i) => ({ id: r.id || i, ...r }))}
               columns={columns}
               slots={{ toolbar: DataGridToolbarEnhanced }}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 10, page: 0 } },
-              }}
               pageSizeOptions={[5, 10, 20]}
             />
           </Box>
         </SectionCard>
       </Grid>
 
+      {/* =======================
+          MODAL
+      ======================= */}
+
       <Dialog
         open={open}
-        onClose={() => {
-          setOpen(false);
-          setEditing(null);
-          reset();
-        }}
-        maxWidth="sm"
+        onClose={() => setOpen(false)}
         fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>
-          {editing ? "Editar Servicio" : "Nueva Servicio"}
+          {editing ? "Editar Servicio" : "Nuevo Servicio"}
         </DialogTitle>
+
         <DialogContent dividers>
-          <Box component="form" sx={{ display: "grid", gap: 2 }}>
-            {/* <TextField
-              select
-              label="Usuario"
-              {...register("user.id", { required: "Requerido" })}
-            >
-              {users.map((u) => (
-                <MenuItem key={u.id} value={u.id}>
-                  {u.apellido}, {u.nombre}
-                </MenuItem>
-              ))}
-            </TextField> */}
+          <Box display="grid" gap={2}>
             <Controller
-              name="user"
+              name="user.id"
               control={control}
               rules={{ required: "Requerido" }}
               render={({ field }) => (
-                <TextField
-                  select
-                  label="Usuario"
-                  fullWidth
-                  error={!!errors.user?.id}
-                  helperText={errors.user?.message}
-                  {...field}
-                >                  
+                <TextField select label="Usuario" {...field}>
                   {users.map((u) => (
                     <MenuItem key={u.id} value={u.id}>
                       {u.apellido}, {u.nombre}
@@ -286,21 +310,18 @@ export default function Servicios() {
               )}
             />
 
-            <TextField
-              select
-              label="Nivel"
-              {...register("nivel.id", { required: "Requerido" })}
-            >
+            <TextField select label="Nivel" {...register("nivel.id")}>
               {niveles.map((n) => (
                 <MenuItem key={n.id} value={n.id}>
                   {n.nombre}
                 </MenuItem>
               ))}
             </TextField>
+
             <TextField
               select
               label="Sección"
-              {...register("seccion.id", { required: "Requerido" })}
+              {...register("seccion.id")}
               disabled={!nivelSel}
             >
               {filteredSecciones.map((s) => (
@@ -309,10 +330,11 @@ export default function Servicios() {
                 </MenuItem>
               ))}
             </TextField>
+
             <TextField
               select
               label="Materia"
-              {...register("materia.id", { required: "Requerido" })}
+              {...register("materia.id")}
               disabled={!seccionSel}
             >
               {filteredMaterias.map((m) => (
@@ -321,29 +343,27 @@ export default function Servicios() {
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              label="Código Cargo"
-              {...register("codigoCargo", { required: "Requerido" })}
-            />
-            <TextField
-              label="Cargo"
-              {...register("cargo", { required: "Requerido" })}
-            />
+
+            <TextField label="Código Cargo" {...register("codigoCargo")} />
+            <TextField label="Cargo" {...register("cargo")} />
             <TextField type="number" label="Puntos" {...register("puntos")} />
             <TextField type="number" label="Cant. Hs" {...register("cantHs")} />
+
             <TextField select label="Carácter" {...register("caracter")}>
               <MenuItem value="Titular">Titular</MenuItem>
               <MenuItem value="Interino">Interino</MenuItem>
               <MenuItem value="Suplente">Suplente</MenuItem>
             </TextField>
+
             <TextField
               type="date"
               label="Fecha de Toma"
               InputLabelProps={{ shrink: true }}
-              {...register("fechaToma", { required: "Requerido" })}
+              {...register("fechaToma")}
             />
           </Box>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancelar</Button>
           <Button variant="contained" onClick={handleSubmit(onSubmit)}>
@@ -355,8 +375,8 @@ export default function Servicios() {
       <Snackbar
         open={!!toast}
         autoHideDuration={2500}
-        onClose={() => setToast("")}
         message={toast}
+        onClose={() => setToast("")}
       />
     </Grid>
   );

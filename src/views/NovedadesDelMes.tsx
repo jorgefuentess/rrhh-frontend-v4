@@ -77,7 +77,7 @@ export default function NovedadesDelMes() {
         <SectionCard>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" fontWeight={600}>Listado</Typography>
-            <Button variant="contained" onClick={() => setOpen(true)}>Nueva Licencia</Button>
+            {/* <Button variant="contained" onClick={() => setOpen(true)}>Nueva Licencia</Button> */}
           </Box>
 
           <Box sx={{ mt: 2 }}>
