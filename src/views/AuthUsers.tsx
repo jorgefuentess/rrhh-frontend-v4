@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { api } from '../helpers/api'
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../helpers/api";
 import {
   Button,
   Dialog,
@@ -9,145 +9,154 @@ import {
   Grid,
   MenuItem,
   Snackbar,
-  TextField
-} from '@mui/material'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { useForm, Controller } from 'react-hook-form'
-import SectionCard from '../components/SectionCard'
-import PageHeader from '../components/PageHeader'
-import DataGridToolbarEnhanced from '../components/DataGridToolbarEnhanced'
+  TextField,
+} from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useForm, Controller } from "react-hook-form";
+import SectionCard from "../components/SectionCard";
+import PageHeader from "../components/PageHeader";
+import DataGridToolbarEnhanced from "../components/DataGridToolbarEnhanced";
 
 type AuthUser = {
-  id?: number
-  username: string
-  role: 'admin' | 'docente'
-  activo: boolean
-  password?: string
-}
+  id?: number;
+  username: string;
+  role: "admin" | "docente";
+  activo: boolean;
+  password?: string;
+};
 
 export default function AuthUsers() {
-  const [rows, setRows] = useState<AuthUser[]>([])
-  const [open, setOpen] = useState(false)
-  const [editing, setEditing] = useState<AuthUser | null>(null)
-  const [toast, setToast] = useState('')
+  const [rows, setRows] = useState<AuthUser[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<AuthUser | null>(null);
+  const [toast, setToast] = useState("");
 
   const { register, handleSubmit, reset, control } = useForm<AuthUser>({
     defaultValues: {
-      username: '',
-      role: 'docente',
+      username: "",
+      role: "docente",
       activo: true,
-      password: ''
-    }
-  })
+      password: "",
+    },
+  });
 
   const load = async () => {
-    const res = await api.get('/auth/users')
-    setRows(res.data)
-  }
+    const res = await api.get("/auth/users");
+    setRows(res.data);
+  };
 
   useEffect(() => {
-    load()
-  }, [])
+    load();
+  }, []);
 
-  const columns = useMemo<GridColDef[]>(() => [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'username', headerName: 'Usuario', flex: 1 },
-    { field: 'role', headerName: 'Rol', flex: 1 },
-    {
-      field: 'activo',
-      headerName: 'Activo',
-      flex: 1,
-      valueGetter: (p) => (p.row.activo ? 'Sí' : 'No')
-    },
-    {
-      field: 'actions',
-      headerName: 'Acciones',
-      width: 220,
-      renderCell: (params) => (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => onEdit(params.row)}
-          >
-            Editar
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            onClick={() => onDelete(params.row.id)}
-          >
-            Eliminar
-          </Button>
-        </div>
-      )
-    }
-  ], [])
+  const columns = useMemo<GridColDef[]>(
+    () => [
+      { field: "id", headerName: "ID", width: 90 },
+      { field: "username", headerName: "Usuario", flex: 1 },
+      { field: "role", headerName: "Rol", flex: 1 },
+      {
+        field: "activo",
+        headerName: "Activo",
+        flex: 1,
+        valueGetter: (p) => (p.row.activo ? "Sí" : "No"),
+      },
+      {
+        field: "actions",
+        headerName: "Acciones",
+        width: 220,
+        renderCell: (params) => (
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => onEdit(params.row)}
+            >
+              Editar
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              onClick={() => onDelete(params.row.id)}
+            >
+              Eliminar
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
 
   const onCreate = () => {
-    setEditing(null)
+    setEditing(null);
     reset({
-      username: '',
-      role: 'docente',
+      username: "",
+      role: "docente",
       activo: true,
-      password: ''
-    })
-    setOpen(true)
-  }
+      password: "",
+    });
+    setOpen(true);
+  };
 
   const onEdit = (row: AuthUser) => {
-    setEditing(row)
+    setEditing(row);
     reset({
       ...row,
-      password: ''
-    })
-    setOpen(true)
-  }
+      password: "",
+    });
+    setOpen(true);
+  };
 
   const onDelete = async (id: number) => {
-    await api.delete(`/auth/users/${id}`)
-    setToast('Eliminado correctamente')
-    load()
-  }
+    await api.delete(`/auth/users/${id}`);
+    setToast("Eliminado correctamente");
+    load();
+  };
 
   const onSubmit = async (data: AuthUser) => {
     if (editing?.id) {
-      await api.put(`/auth/users/${editing.id}`, data)
-      setToast('Actualizado correctamente')
+      await api.put(`/auth/users/${editing.id}`, data);
+      setToast("Actualizado correctamente");
     } else {
-      await api.post('/auth/users', data)
-      setToast('Creado correctamente')
+      await api.post("/auth/users", data);
+      setToast("Creado correctamente");
     }
 
-    setOpen(false)
-    load()
-  }
+    setOpen(false);
+    load();
+  };
 
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <PageHeader
           title="Usuarios del Sistema"
-          trail={['Inicio', 'Administración', 'Usuarios del Sistema']}
+          trail={["Inicio", "Administración", "Usuarios del Sistema"]}
         />
       </Grid>
 
       <Grid item xs={12}>
         <SectionCard>
-          <div style={{ height: 560, width: '100%' }}>
+          <div style={{ height: 560, width: "100%" }}>
             <DataGrid
-              rows={rows.map(r => ({ id: r.id, ...r }))}
+              rows={rows.map((r) => ({ id: r.id, ...r }))}
               columns={columns}
               slots={{ toolbar: DataGridToolbarEnhanced }}
               initialState={{
-                pagination: { paginationModel: { pageSize: 10, page: 0 } }
+                pagination: { paginationModel: { pageSize: 10, page: 0 } },
               }}
               pageSizeOptions={[5, 10, 20]}
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 12,
+            }}
+          >
             <Button variant="contained" onClick={onCreate}>
               Nuevo
             </Button>
@@ -155,16 +164,21 @@ export default function AuthUsers() {
         </SectionCard>
       </Grid>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>
-          {editing ? 'Editar usuario' : 'Nuevo usuario'}
+          {editing ? "Editar usuario" : "Nuevo usuario"}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 1, display: 'grid', gap: 2 }}>
+        <DialogContent sx={{ pt: 1, display: "grid", gap: 2 }}>
           <TextField
             label="Usuario"
             fullWidth
-            {...register('username', { required: true })}
+            {...register("username", { required: true })}
           />
 
           {/* ROL CORREGIDO */}
@@ -179,24 +193,28 @@ export default function AuthUsers() {
             )}
           />
 
-          {/* ACTIVO CORREGIDO */}
           <Controller
             name="activo"
             control={control}
             render={({ field }) => (
-              <TextField select label="Activo" fullWidth {...field}>
-                <MenuItem value={true}>Sí</MenuItem>
-                <MenuItem value={false}>No</MenuItem>
+              <TextField
+                select
+                label="Activo"
+                fullWidth
+                value={field.value ? "true" : "false"}
+                onChange={(e) => field.onChange(e.target.value === "true")}
+              >
+                <MenuItem value="true">Sí</MenuItem>
+                <MenuItem value="false">No</MenuItem>
               </TextField>
             )}
           />
-
           <TextField
             label="Contraseña"
             type="password"
             fullWidth
-            helperText={editing ? 'Dejar vacío para no cambiar' : ''}
-            {...register('password')}
+            helperText={editing ? "Dejar vacío para no cambiar" : ""}
+            {...register("password")}
           />
         </DialogContent>
 
@@ -211,9 +229,9 @@ export default function AuthUsers() {
       <Snackbar
         open={!!toast}
         autoHideDuration={2500}
-        onClose={() => setToast('')}
+        onClose={() => setToast("")}
         message={toast}
       />
     </Grid>
-  )
+  );
 }
