@@ -179,7 +179,7 @@ export default function Personas() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <PageHeader title="Personas" trail={["Inicio", "Personas"]} />
+        <PageHeader title="No Docente" trail={["Inicio", "No Docente"]} />
       </Grid>
 
       <Grid item xs={12}>
