@@ -43,10 +43,10 @@ export default function Login(){
             <TextField label="Contraseña" type="password" {...register('password', { required: true })} />
             <Button type="submit" variant="contained" disabled={loading}>{loading ? 'Validando...' : 'Entrar'}</Button>
             {error && <Alert severity="error">{error}</Alert>}
-            <Divider />
+            {/* <Divider />
             <Typography variant="body2" color="text.secondary" align="center">
               Admin por defecto: <b>admin / admin123</b>
-            </Typography>
+            </Typography> */}
           </Box>
         </CardContent>
       </Card>
