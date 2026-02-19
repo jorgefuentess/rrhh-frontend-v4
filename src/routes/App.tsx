@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import Home from "../views/Home";
-import Personas from "../views/Personas"; // ✅ agregado
+import Personas from "../views/Personas";
 import Servicios from "../views/Servicios";
 import DDJJ from "../views/DDJJ";
 import Licencias from "../views/Licencias";
@@ -12,6 +12,7 @@ import MiLicencia from "../views/MiLicencia";
 import NoDocente from "../views/NoDocente";
 import ServicioNoDocente from "../views/ServicioNoDocente";
 import NovedadesDelMes from "../views/NovedadesDelMes";
+import { ROLES } from "../config/roles";
 
 export default function App() {
   return (
@@ -30,7 +31,7 @@ export default function App() {
       <Route
         path="/personas"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.SECRETARIO]}>
             <DashboardLayout>
               <Personas />
             </DashboardLayout>
@@ -40,7 +41,7 @@ export default function App() {
       <Route
         path="/servicios"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.SECRETARIO]}>
             <DashboardLayout>
               <Servicios />
             </DashboardLayout>
@@ -50,7 +51,7 @@ export default function App() {
       <Route
         path="/ddjj"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.DOCENTE]}>
             <DashboardLayout>
               <DDJJ />
             </DashboardLayout>
@@ -60,7 +61,7 @@ export default function App() {
       <Route
         path="/licencias"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.SECRETARIO]}>
             <DashboardLayout>
               <Licencias />
             </DashboardLayout>
@@ -70,7 +71,7 @@ export default function App() {
       <Route
         path="/auth-users"
         element={
-          <ProtectedRoute roles={["admin"]}>
+          <ProtectedRoute roles={[ROLES.ADMIN]}>
             <DashboardLayout>
               <AuthUsers />
             </DashboardLayout>
@@ -80,7 +81,7 @@ export default function App() {
       <Route
         path="/milicencia"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.DOCENTE]}>
             <DashboardLayout>
               <MiLicencia />
             </DashboardLayout>
@@ -90,7 +91,7 @@ export default function App() {
       <Route
         path="/nodocente"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.SECRETARIO]}>
             <DashboardLayout>
               <NoDocente />
             </DashboardLayout>
@@ -100,7 +101,7 @@ export default function App() {
       <Route
         path="/servicionodocente"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.SECRETARIO]}>
             <DashboardLayout>
               <ServicioNoDocente />
             </DashboardLayout>
@@ -110,7 +111,7 @@ export default function App() {
       <Route
         path="/novedadesdelmes"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={[ROLES.ADMIN]}>
             <DashboardLayout>
               <NovedadesDelMes />
             </DashboardLayout>

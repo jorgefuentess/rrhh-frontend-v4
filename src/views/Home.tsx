@@ -1,75 +1,40 @@
-import { Grid, Typography, Paper, useTheme } from '@mui/material'
+import { Grid, Typography, Paper, useTheme, Box } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
-import GroupIcon from '@mui/icons-material/Group'
-import WorkHistoryIcon from '@mui/icons-material/WorkHistory'
-import EventAvailableIcon from '@mui/icons-material/EventAvailable'
-import DescriptionIcon from '@mui/icons-material/Description'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
-import PersonIcon from '@mui/icons-material/Person'
-import AssignmentIcon from '@mui/icons-material/Assignment'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+import { useAuth } from '../state/AuthContext'
+import { getVisibleMenuItems } from '../config/menuConfig'
+import { getIcon } from '../config/iconMap'
 
 export default function Home() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const cards = [
-    {
-      title: 'Personas',
-      desc: 'Alta y gestión de docentes y agentes.',
-      icon: <GroupIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/personas', // ✅ Actualizado
-    },
-    {
-      title: 'Servicios',
-      desc: 'Altas, bajas, secciones, materias y carácter.',
-      icon: <WorkHistoryIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/servicios',
-    },
-    {
-      title: 'DDJJ',
-      desc: 'Declaraciones Juradas.',
-      icon: <DescriptionIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/ddjj',
-    },
-    {
-      title: 'Licencias',
-      desc: 'Registro y control de plazos.',
-      icon: <EventAvailableIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/licencias',
-    },
-    {
-      title: 'Usuarios Sistema',
-      desc: 'Gestión de usuarios y permisos.',
-      icon: <AdminPanelSettingsIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/auth-users',
-    },
-    {
-      title: 'Mi Licencia',
-      desc: 'Consulta tu licencia personal.',
-      icon: <EventAvailableIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/milicencia',
-    },
-    {
-      title: 'No Docente',
-      desc: 'Información del personal no docente.',
-      icon: <PersonIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/nodocente',
-    },
-    {
-      title: 'Servicio No Docente',
-      desc: 'Servicios del personal no docente.',
-      icon: <AssignmentIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/servicionodocente',
-    },
-    {
-      title: 'Novedades del Mes',
-      desc: 'Últimas novedades y actualizaciones.',
-      icon: <NotificationsIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-      path: '/novedadesdelmes',
-    },
-  ]
+  // Obtener menú visible según roles
+  const visibleItems = user ? getVisibleMenuItems(user.roles) : []
+
+  // Mapeo de descripción por ruta (para mejorar UX)
+  const descriptionMap: Record<string, string> = {
+    '/personas': 'Alta y gestión de docentes y agentes.',
+    '/servicios': 'Altas, bajas, secciones, materias y carácter.',
+    '/ddjj': 'Declaraciones Juradas.',
+    '/licencias': 'Registro y control de plazos.',
+    '/auth-users': 'Gestión de usuarios y permisos del sistema.',
+    '/milicencia': 'Consulta tu licencia personal.',
+    '/nodocente': 'Información del personal no docente.',
+    '/servicionodocente': 'Servicios del personal no docente.',
+    '/novedadesdelmes': 'Últimas novedades y actualizaciones.',
+  }
+
+  // Filtrar inicio (siempre visible) y mapear con descripciones
+  const cards = visibleItems
+    .filter(item => item.path !== '/')
+    .map(item => ({
+      title: item.text,
+      desc: descriptionMap[item.path] || 'Acceder a esta sección',
+      iconName: item.iconName,
+      path: item.path,
+    }))
 
   return (
     <Grid container spacing={2}>
@@ -106,7 +71,9 @@ export default function Home() {
               },
             }}
           >
-            {c.icon}
+            <Box sx={{ fontSize: 40, color: theme.palette.primary.main }}>
+              {getIcon(c.iconName)}
+            </Box>
             <Typography variant="h6" fontWeight={700}>
               {c.title}
             </Typography>
