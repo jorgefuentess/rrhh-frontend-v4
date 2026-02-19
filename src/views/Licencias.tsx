@@ -85,8 +85,9 @@ export default function Licencias() {
       const licenciaCreada = licenciaResponse.data;
 
       // 2️⃣ Crear novedad con el id de la licencia
+        console.log("licencia creada", licenciaCreada);
       const bodyNovedad = {
-        licenciaId: licenciaCreada.id,
+        datoid: licenciaCreada.id,
         accion: "CREACIÓN DE LICENCIA",
         typo: "LICENCIA",
       };

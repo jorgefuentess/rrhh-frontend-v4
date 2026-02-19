@@ -23,7 +23,7 @@ import DataGridToolbarEnhanced from "../components/DataGridToolbarEnhanced";
 type DDJJ = {
   id?: string;
   persona: { id: string; apellido: string; nombre: string };
-  cargosHsPrivados?: number;
+  horas?: number;
   cargosHsPublicos?: number;
   escuela: { id: string; apellido: string; nombre: string };
 };
@@ -55,6 +55,7 @@ export default function DDJJView() {
       setRows(ddjjRes.data);
       setPersonas(persRes.data);
       setEscuelas(escRes.data);
+      console.log("escuela",escRes.data)
     } catch (err) {
       console.error("❌ Error cargando DDJJ o Personas", err);
       setToast("No se pudo cargar DDJJ/personas");
@@ -68,8 +69,8 @@ export default function DDJJView() {
   const onSubmit = async (data: DDJJ) => {
     const body = {
       personaId: data.persona.id,
-      cargosHsPrivados: Number(data.cargosHsPrivados),
-      cargosHsPublicos: Number(data.cargosHsPublicos),
+      horas: Number(data.horas),
+      // cargosHsPublicos: Number(data.cargosHsPublicos),
     };
     await api.post("/ddjj", body);
     setToast("Declaración jurada registrada");
@@ -87,7 +88,7 @@ export default function DDJJView() {
         valueGetter: (p) =>
           `${p.row.user?.apellido || ""} ${p.row.user?.nombre || ""}`,
       },
-      { field: "cargosHsPrivados", headerName: "Hs. Privados", flex: 1 },
+      { field: "horas", headerName: "Horas", flex: 1 },
       { field: "cargosHsPublicos", headerName: "Hs. Públicos", flex: 1 },
     ],
     [],
@@ -163,7 +164,7 @@ export default function DDJJView() {
             >
               {escuelas.map((e) => (
                 <MenuItem key={e.id} value={e.id}>
-                  {" "}
+                
                   {e.nombre}
                 </MenuItem>
               ))}
@@ -171,14 +172,10 @@ export default function DDJJView() {
 
             <TextField
               type="number"
-              label="Hs. Privados"
-              {...register("cargosHsPrivados", { valueAsNumber: true })}
+              label="Horas"
+              {...register("horas", { valueAsNumber: true })}
             />
-            <TextField
-              type="number"
-              label="Hs. Públicos"
-              {...register("cargosHsPublicos", { valueAsNumber: true })}
-            />
+          
             {/* <Button type="submit" variant="contained">
               Guardar
             </Button> */}

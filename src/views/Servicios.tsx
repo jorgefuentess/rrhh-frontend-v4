@@ -24,6 +24,8 @@ import ResponsiveDataGrid from "../components/ResponsiveDataGrid";
    TIPOS
 ======================= */
 
+type Caracter = "Titular" | "Interino" | "Suplente";
+
 type Servicio = {
   id?: string;
   user: { id: string };
@@ -34,7 +36,7 @@ type Servicio = {
   cargo: string;
   puntos: number;
   cantHs: number;
-  caracter: string;
+  caracter: Caracter;
   fechaToma: string;
 };
 
@@ -42,10 +44,6 @@ type CatNivel = { id: number; nombre: string };
 type CatSeccion = { id: number; nombre: string; nivel: { id: number } };
 type CatMateria = { id: number; nombre: string; seccion: { id: number } };
 type SimpleUser = { id: string; apellido: string; nombre: string };
-
-/* =======================
-   COMPONENTE
-======================= */
 
 export default function Servicios() {
   const defaultValues: Servicio = {
@@ -61,15 +59,8 @@ export default function Servicios() {
     fechaToma: "",
   };
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm<Servicio>({ defaultValues });
+  const { register, handleSubmit, reset, watch, control, setValue } =
+    useForm<Servicio>({ defaultValues });
 
   const [rows, setRows] = useState<Servicio[]>([]);
   const [users, setUsers] = useState<SimpleUser[]>([]);
@@ -95,6 +86,7 @@ export default function Servicios() {
       api.get("/catalogos/seccion"),
       api.get("/catalogos/materia"),
     ]);
+
     setRows(serv.data);
     setUsers(u.data);
     setNiveles(n.data);
@@ -113,11 +105,11 @@ export default function Servicios() {
   useEffect(() => {
     setValue("seccion.id", 0);
     setValue("materia.id", 0);
-  }, [nivelSel]);
+  }, [nivelSel, setValue]);
 
   useEffect(() => {
     setValue("materia.id", 0);
-  }, [seccionSel]);
+  }, [seccionSel, setValue]);
 
   const filteredSecciones = secciones.filter(
     (s) => s.nivel.id === Number(nivelSel),
@@ -135,36 +127,39 @@ export default function Servicios() {
     const body = {
       user: { id: data.user.id },
       nivel: { id: Number(data.nivel.id) },
-      seccion: { id: Number(data.seccion?.id) },
-      materia: { id: Number(data.materia?.id) },
+      seccion: data.seccion?.id ? { id: Number(data.seccion.id) } : null,
+      materia: data.materia?.id ? { id: Number(data.materia.id) } : null,
       codigoCargo: data.codigoCargo,
       cargo: data.cargo,
-      puntos: data.puntos,
-      cantHs: data.cantHs,
+      puntos: Number(data.puntos),
+      cantHs: Number(data.cantHs),
       caracter: data.caracter,
       fechaToma: data.fechaToma,
     };
 
     if (editing?.id) {
-      // await api.put(`/servicios/${editing.id}`, body);
-
-      // 1️⃣ Crear licencia
       const servicioResponse = await api.put(`/servicios/${editing.id}`, body);
 
-      console.log("licencia creada", servicioResponse);
-      const servicioCreada = servicioResponse.data;
-
-      // 2️⃣ Crear novedad con el id de la licencia
-      const bodyNovedad = {
-        licenciaId: servicioCreada.id,
+      const servicioActualizado = servicioResponse.data;
+      console.log("servicioActualizado", servicioActualizado);
+      await api.post("/novedad", {
+        datoid: servicioActualizado.id,
         accion: "EDICION DE SERVICIO",
         typo: "SERVICIO",
-      };
-      console.log("body para mandar", bodyNovedad);
-      await api.post("/novedad", bodyNovedad);
+      });
+
       setToast("Servicio actualizado correctamente");
     } else {
-      await api.post("/servicios", body);
+      const servicioResponse = await api.post("/servicios", body);
+
+      const servicioCreado = servicioResponse.data;
+
+      await api.post("/novedad", {
+        servicioId: servicioCreado.id,
+        accion: "CREACION DE SERVICIO",
+        typo: "SERVICIO",
+      });
+
       setToast("Servicio creado correctamente");
     }
 
@@ -180,6 +175,7 @@ export default function Servicios() {
 
   const onEdit = (row: Servicio) => {
     setEditing(row);
+
     reset({
       user: { id: row.user.id },
       nivel: { id: row.nivel.id },
@@ -189,9 +185,10 @@ export default function Servicios() {
       cargo: row.cargo,
       puntos: row.puntos,
       cantHs: row.cantHs,
-      caracter: row.caracter,
+      caracter: row.caracter as Caracter,
       fechaToma: row.fechaToma,
     });
+
     setOpen(true);
   };
 
@@ -279,10 +276,6 @@ export default function Servicios() {
         </SectionCard>
       </Grid>
 
-      {/* =======================
-          MODAL
-      ======================= */}
-
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -298,7 +291,6 @@ export default function Servicios() {
             <Controller
               name="user.id"
               control={control}
-              rules={{ required: "Requerido" }}
               render={({ field }) => (
                 <TextField select label="Usuario" {...field}>
                   {users.map((u) => (
@@ -349,11 +341,17 @@ export default function Servicios() {
             <TextField type="number" label="Puntos" {...register("puntos")} />
             <TextField type="number" label="Cant. Hs" {...register("cantHs")} />
 
-            <TextField select label="Carácter" {...register("caracter")}>
-              <MenuItem value="Titular">Titular</MenuItem>
-              <MenuItem value="Interino">Interino</MenuItem>
-              <MenuItem value="Suplente">Suplente</MenuItem>
-            </TextField>
+            <Controller
+              name="caracter"
+              control={control}
+              render={({ field }) => (
+                <TextField select label="Carácter" {...field}>
+                  <MenuItem value="Titular">Titular</MenuItem>
+                  <MenuItem value="Interino">Interino</MenuItem>
+                  <MenuItem value="Suplente">Suplente</MenuItem>
+                </TextField>
+              )}
+            />
 
             <TextField
               type="date"
