@@ -18,23 +18,15 @@ import {
 } from "@mui/material";
 import {
   Home,
-  Group,
-  WorkHistory,
-  CalendarMonth,
-  Security,
-  Description as DescriptionIcon,
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
   DarkMode,
   LightMode,
-  AdminPanelSettings,
-  EventAvailable,
-  Person,
-  Assignment,
-  Notifications,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../state/AuthContext";
+import { getVisibleMenuItems } from "../config/menuConfig";
+import { getIcon } from "../config/iconMap";
 
 const drawerWidth = 240;
 
@@ -55,23 +47,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
     window.dispatchEvent(new Event("toggle-theme"));
   };
 
-  const menuItems = [
-    { text: "Inicio", icon: <Home />, path: "/" },
-    { text: "Personas", icon: <Group />, path: "/personas" }, // ✅ actualizado
-    { text: "Servicios", icon: <WorkHistory />, path: "/servicios" },
-    { text: "DDJJ", icon: <DescriptionIcon />, path: "/ddjj" },
-    { text: "Licencias", icon: <CalendarMonth />, path: "/licencias" },
-    {
-      text: "Usuarios Sistema",
-      icon: <AdminPanelSettings />,
-      path: "/auth-users",
-      adminOnly: true,
-    },
-    { text: "Mi Licencia", icon: <EventAvailable />, path: "/milicencia" },
-    { text: "No Docente", icon: <Person />, path: "/nodocente" },
-    { text: "Servicio No Docente", icon: <Assignment />, path: "/servicionodocente" },
-    { text: "Novedades del Mes", icon: <Notifications />, path: "/novedadesdelmes" },
-  ];
+  // Obtener menú visible según roles del usuario
+  const visibleMenuItems = user ? getVisibleMenuItems(user.roles) : [];
 
   return (
     <Box
@@ -122,7 +99,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                 </IconButton>
               </Tooltip>
               <Typography sx={{ fontWeight: 500 }}>
-                {user.username} ({user.role})
+                {user.username} ({user.roles.join(", ")})
               </Typography>
               <Button variant="outlined" color="inherit" onClick={logout}>
                 Salir
@@ -191,8 +168,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
         />
 
         <List>
-          {menuItems.map((item) => {
-            if (item.adminOnly && user?.role !== "admin") return null;
+          {visibleMenuItems.map((item) => {
             const selected = location.pathname === item.path;
 
             return (
@@ -239,7 +215,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                       minWidth: 36,
                     }}
                   >
-                    {item.icon}
+                    {getIcon(item.iconName)}
                   </ListItemIcon>
 
                   {open && (
