@@ -49,7 +49,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
 
   // Obtener menú visible según roles del usuario
   const visibleMenuItems = user ? getVisibleMenuItems(user.roles) : [];
-
+  console.log("usuario", visibleMenuItems);
+    console.log("user", user);
   return (
     <Box
       sx={{
@@ -187,8 +188,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                     color: selected
                       ? theme.palette.primary.main
                       : isDark
-                      ? "#e6edf3"
-                      : "#ffffff",
+                        ? "#e6edf3"
+                        : "#ffffff",
                     backgroundColor: selected
                       ? isDark
                         ? "rgba(255,255,255,0.1)"
@@ -200,8 +201,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                           ? "rgba(255,255,255,0.1)"
                           : "#e8f0fe"
                         : isDark
-                        ? "rgba(255,255,255,0.05)"
-                        : "rgba(255,255,255,0.15)",
+                          ? "rgba(255,255,255,0.05)"
+                          : "rgba(255,255,255,0.15)",
                     },
                   }}
                 >
@@ -210,8 +211,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                       color: selected
                         ? theme.palette.primary.main
                         : isDark
-                        ? "#e6edf3"
-                        : "#ffffff",
+                          ? "#e6edf3"
+                          : "#ffffff",
                       minWidth: 36,
                     }}
                   >
@@ -227,8 +228,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                           selected && !isDark
                             ? theme.palette.primary.main
                             : isDark
-                            ? "#e6edf3"
-                            : "#ffffff",
+                              ? "#e6edf3"
+                              : "#ffffff",
                       }}
                     />
                   )}

@@ -56,6 +56,8 @@ export default function DDJJView() {
       setPersonas(persRes.data);
       setEscuelas(escRes.data);
       console.log("escuela",escRes.data)
+
+      
     } catch (err) {
       console.error("❌ Error cargando DDJJ o Personas", err);
       setToast("No se pudo cargar DDJJ/personas");

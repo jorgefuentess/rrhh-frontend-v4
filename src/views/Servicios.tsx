@@ -192,6 +192,12 @@ export default function Servicios() {
     setOpen(true);
   };
 
+  const onDelete = async (row: any) => {
+    console.log(row)
+    await api.delete(`/remove/${row.id}`);
+    setToast("Persona eliminada correctamente");
+    load();
+  };
   /* =======================
      COLUMNAS
   ======================= */
@@ -226,13 +232,32 @@ export default function Servicios() {
         headerName: "Acciones",
         width: 160,
         renderCell: (params) => (
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => onEdit(params.row)}
-          >
-            Editar
-          </Button>
+          // <Button
+          //   size="small"
+          //   variant="outlined"
+          //   onClick={() => onEdit(params.row)}
+          // >
+          //   Editar
+          // </Button>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => onEdit(params.row)}
+            >
+              Editar
+            </Button>
+
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              onClick={() => onDelete(params.row)}
+            >
+              Eliminar
+            </Button>
+          </div>
         ),
       },
     ],
