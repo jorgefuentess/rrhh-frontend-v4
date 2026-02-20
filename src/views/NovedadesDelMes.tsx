@@ -11,25 +11,30 @@ import PageHeader from '../components/PageHeader'
 import ResponsiveDataGrid from '../components/ResponsiveDataGrid'
 import DataGridToolbarEnhanced from '../components/DataGridToolbarEnhanced'
 
-type Licencia = {
+type Novedad = {
   id?: string
-  user: { id: string }
-  tipo: string
-  fechaInicio: string
-  fechaFin: string
-  observaciones?: string
+  accion: string
+  usuario: string
+  tipoLicencia?: string | null
+  observaciones?: string | null
+  cambios?: Record<string, any> | null
+  fechaSistema?: string | null
+  fechaModificacion?: string | null
+  miLicencia?: any
+  licencia?: any
+  servicio?: any
 }
 
 type SimpleUser = { id: string; apellido: string; nombre: string }
 
 export default function NovedadesDelMes() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<Licencia>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<any>({
     defaultValues: {
       user: { id: '' }, tipo: '', fechaInicio: '', fechaFin: '', observaciones: ''
     }
   })
 
-  const [rows, setRows] = useState<Licencia[]>([])
+  const [rows, setRows] = useState<Novedad[]>([])
   const [users, setUsers] = useState<SimpleUser[]>([])
   const [toast, setToast] = useState('')
   const [open, setOpen] = useState(false)
@@ -45,7 +50,7 @@ export default function NovedadesDelMes() {
   }
   useEffect(() => { load() }, [])
 
-  const onSubmit = async (data: Licencia) => {
+  const onSubmit = async (data: any) => {
     const body = {
       user: { id: data.user.id },
       tipo: data.tipo,
@@ -61,11 +66,64 @@ export default function NovedadesDelMes() {
   }
 
   const columns = useMemo<GridColDef[]>(() => [
-    { field: 'accion', headerName: 'Accion', flex: 1 },
-    { field: 'fechaSistema', headerName: 'Fecha', flex: 1 },
-    { field: 'fechaFin', headerName: 'Fin', flex: 1 },
+    { field: 'accion', headerName: 'Acción', flex: 1.2 },
+    { field: 'usuario', headerName: 'Usuario', flex: 1.2 },
+    { field: 'tipoLicencia', headerName: 'Tipo Licencia', flex: 1.2 },
     { field: 'observaciones', headerName: 'Observaciones', flex: 1.5 },
+    {
+      field: 'cambios',
+      headerName: 'Cambios',
+      flex: 2,
+      valueGetter: (p) => {
+        const cambios = p.row.cambios
+        if (!cambios) return ''
+        return Object.entries(cambios)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(' | ')
+      }
+    },
+    { field: 'fechaSistema', headerName: 'Fecha Sistema', flex: 1 },
+    { field: 'fechaModificacion', headerName: 'Fecha Modificación', flex: 1 },
   ], [])
+
+  const userNameById = useMemo(() => {
+    const map = new Map<string, string>()
+    users.forEach((u) => {
+      const fullName = `${u.apellido || ''} ${u.nombre || ''}`.trim()
+      map.set(u.id, fullName)
+    })
+    return map
+  }, [users])
+
+  const resolveUsuario = (r: Novedad) => {
+    const raw = r.usuario
+    const normalized = raw && raw !== 'undefined' && raw !== 'null' ? raw : ''
+    if (normalized) return normalized
+
+    const fromUser = (u?: any) =>
+      u ? `${u.apellido || ''} ${u.nombre || ''}`.trim() : ''
+
+    const nestedUserName =
+      fromUser(r.miLicencia?.user) ||
+      fromUser(r.licencia?.user) ||
+      fromUser((r as any).user)
+
+    if (nestedUserName) return nestedUserName
+
+    const userId =
+      r.miLicencia?.userId ||
+      r.miLicencia?.user?.id ||
+      r.licencia?.userId ||
+      r.licencia?.user?.id ||
+      (r as any).userId ||
+      (r as any).user?.id
+
+    if (userId && userNameById.has(userId)) {
+      return userNameById.get(userId) || ''
+    }
+
+    return ''
+  }
 
   return (
     <Grid container spacing={2}>
@@ -83,7 +141,19 @@ export default function NovedadesDelMes() {
           <Box sx={{ mt: 2 }}>
             <ResponsiveDataGrid
               fill
-              rows={rows.map((r, i) => ({ id: r.id || i, ...r }))}
+              rows={rows.map((r, i) => ({
+                id: r.id || i,
+                accion: r.accion,
+                usuario: resolveUsuario(r),
+                tipoLicencia: r.tipoLicencia || r.miLicencia?.tipo?.nombre || r.licencia?.tipo?.nombre || '',
+                observaciones: r.observaciones || r.miLicencia?.observaciones || r.licencia?.observaciones || '',
+                cambios: r.cambios,
+                fechaSistema: r.fechaSistema || r.miLicencia?.fechaSistema || r.licencia?.fechaSistema || '',
+                fechaModificacion: r.fechaModificacion || '',
+                miLicencia: r.miLicencia,
+                licencia: r.licencia,
+                servicio: r.servicio,
+              }))}
               columns={columns}
               slots={{ toolbar: DataGridToolbarEnhanced }}
               initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
@@ -98,10 +168,10 @@ export default function NovedadesDelMes() {
         {/* <DialogTitle>Nueva </DialogTitle> */}
         <DialogContent dividers>
           <Box component="form" sx={{ display: 'grid', gap: 2 }}>
-            <TextField select label="Usuario" {...register('user.id', { required: 'Requerido' })} error={!!errors.user?.id}>
+            <TextField select label="Usuario" {...register('user.id', { required: 'Requerido' })} error={!!(errors as any).user?.id}>
               {users.map(u => <MenuItem key={u.id} value={u.id}>{u.apellido}, {u.nombre}</MenuItem>)}
             </TextField>
-            <TextField label="Tipo" {...register('tipo', { required: 'Requerido' })} error={!!errors.tipo} helperText={errors.tipo?.message} />
+            <TextField label="Tipo" {...register('tipo', { required: 'Requerido' })} error={!!(errors as any).tipo} helperText={(errors as any).tipo?.message} />
             <TextField type="date" label="Fecha Inicio" InputLabelProps={{ shrink: true }} {...register('fechaInicio', { required: 'Requerido' })} />
             <TextField type="date" label="Fecha Fin" InputLabelProps={{ shrink: true }} {...register('fechaFin', { required: 'Requerido' })} />
             <TextField label="Observaciones" multiline rows={2} {...register('observaciones')} />
