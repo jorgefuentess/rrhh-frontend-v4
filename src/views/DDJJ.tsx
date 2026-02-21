@@ -25,7 +25,7 @@ type DDJJ = {
   persona: { id: string; apellido: string; nombre: string };
   horas?: number;
   cargosHsPublicos?: number;
-  escuela: { id: string; apellido: string; nombre: string };
+  escuela: { id: string; email: string; nombre: string };
 };
 
 type Persona = { id: string; apellido: string; nombre: string };
@@ -72,8 +72,11 @@ export default function DDJJView() {
     const body = {
       personaId: data.persona.id,
       horas: Number(data.horas),
+      escuelaId:data.escuela.id
       // cargosHsPublicos: Number(data.cargosHsPublicos),
     };
+
+    console.log("escuela completo",body)
     await api.post("/ddjj", body);
     setToast("Declaración jurada registrada");
     reset();
