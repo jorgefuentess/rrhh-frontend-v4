@@ -140,25 +140,9 @@ export default function Servicios() {
     if (editing?.id) {
       const servicioResponse = await api.put(`/servicios/${editing.id}`, body);
 
-      const servicioActualizado = servicioResponse.data;
-      console.log("servicioActualizado", servicioActualizado);
-      await api.post("/novedad", {
-        datoid: servicioActualizado.id,
-        accion: "EDICION DE SERVICIO",
-        typo: "SERVICIO",
-      });
-
       setToast("Servicio actualizado correctamente");
     } else {
       const servicioResponse = await api.post("/servicios", body);
-
-      const servicioCreado = servicioResponse.data;
-
-      await api.post("/novedad", {
-        servicioId: servicioCreado.id,
-        accion: "CREACION DE SERVICIO",
-        typo: "SERVICIO",
-      });
 
       setToast("Servicio creado correctamente");
     }
