@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 // Aceptar tanto role (string único) como roles (array)
-type User = { username: string; roles: string[]; sub: number }
+type User = { username: string; roles: string[]; sub: number; personaId?: string }
 type AuthState = { token: string | null; user: User | null }
 type AuthContextType = AuthState & { login: (token: string, user: any) => void; logout: () => void }
 
@@ -19,6 +19,7 @@ function normalizeUser(userData: any): User {
     username: userData.username,
     roles,
     sub: userData.sub,
+    personaId: userData.personaId,
   }
 }
 

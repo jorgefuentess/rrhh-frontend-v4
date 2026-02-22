@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../helpers/api";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -10,6 +11,7 @@ import {
   MenuItem,
   Snackbar,
   TextField,
+  Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useForm, Controller } from "react-hook-form";
@@ -20,23 +22,34 @@ import DataGridToolbarEnhanced from "../components/DataGridToolbarEnhanced";
 type AuthUser = {
   id?: number;
   username: string;
-  role: "admin" | "docente";
+  role: "admin" | "docente" | "secretario";
   activo: boolean;
   password?: string;
+  personaId?: string;
+};
+
+type Persona = {
+  id: string;
+  apellido: string;
+  nombre: string;
+  dni: string;
+  legajo?: string;
 };
 
 export default function AuthUsers() {
   const [rows, setRows] = useState<AuthUser[]>([]);
+  const [personas, setPersonas] = useState<Persona[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<AuthUser | null>(null);
   const [toast, setToast] = useState("");
 
-  const { register, handleSubmit, reset, control } = useForm<AuthUser>({
+  const { register, handleSubmit, reset, control, watch } = useForm<AuthUser>({
     defaultValues: {
       username: "",
       role: "docente",
       activo: true,
       password: "",
+      personaId: "",
     },
   });
 
@@ -45,8 +58,18 @@ export default function AuthUsers() {
     setRows(res.data);
   };
 
+  const loadPersonas = async () => {
+    try {
+      const res = await api.get("/users");
+      setPersonas(res.data);
+    } catch (error) {
+      console.error("Error cargando personas:", error);
+    }
+  };
+
   useEffect(() => {
     load();
+    loadPersonas();
   }, []);
 
   const columns = useMemo<GridColDef[]>(
@@ -63,9 +86,16 @@ export default function AuthUsers() {
       {
         field: "actions",
         headerName: "Acciones",
-        width: 220,
+        width: 280,
         renderCell: (params) => (
           <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => onCreate()}
+            >
+              Nuevo
+            </Button>
             <Button
               size="small"
               variant="outlined"
@@ -95,6 +125,7 @@ export default function AuthUsers() {
       role: "docente",
       activo: true,
       password: "",
+      personaId: "",
     });
     setOpen(true);
   };
@@ -116,11 +147,37 @@ export default function AuthUsers() {
 
   const onSubmit = async (data: AuthUser) => {
     if (editing?.id) {
-      await api.put(`/auth/users/${editing.id}`, data);
+      // Editar: puede actualizar rol, activo, password y personaId
+      const updateData: any = {
+        role: data.role,
+        activo: data.activo,
+      };
+      if (data.password) updateData.password = data.password;
+      if (data.personaId) updateData.personaId = data.personaId;
+      
+      await api.put(`/auth/users/${editing.id}`, updateData);
       setToast("Actualizado correctamente");
     } else {
-      await api.post("/auth/users", data);
-      setToast("Creado correctamente");
+      // Crear: si tiene personaId usa endpoint de vinculación, sino crea solo usuario
+      if (data.personaId) {
+        // Vincular usuario con persona
+        await api.post("/auth/users/link-persona", {
+          username: data.username,
+          password: data.password,
+          role: data.role,
+          personaId: data.personaId,
+        });
+        setToast("Usuario vinculado a persona correctamente");
+      } else {
+        // Crear solo usuario (sin persona)
+        await api.post("/auth/users", {
+          username: data.username,
+          password: data.password,
+          role: data.role,
+          activo: true,
+        });
+        setToast("Usuario creado correctamente");
+      }
     }
 
     setOpen(false);
@@ -157,9 +214,6 @@ export default function AuthUsers() {
               marginTop: 12,
             }}
           >
-            <Button variant="contained" onClick={onCreate}>
-              Nuevo
-            </Button>
           </div>
         </SectionCard>
       </Grid>
@@ -175,13 +229,29 @@ export default function AuthUsers() {
         </DialogTitle>
 
         <DialogContent sx={{ pt: 1, display: "grid", gap: 2 }}>
+          {/* Selector de modo (solo si está creando) */}
+          {!editing && (
+            <Box sx={{ p: 2, bgcolor: "#f5f5f5", borderRadius: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                📌 Opciones:
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#666" }}>
+                Crea un usuario de sistema. Opcionalmente puedes vincularlo a una persona existente.
+              </Typography>
+            </Box>
+          )}
+
+          <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600 }}>
+            📋 Datos de Autenticación
+          </Typography>
+
           <TextField
             label="Usuario"
             fullWidth
+            disabled={!!editing}
             {...register("username", { required: true })}
           />
 
-          {/* ROL CORREGIDO */}
           <Controller
             name="role"
             control={control}
@@ -189,6 +259,7 @@ export default function AuthUsers() {
               <TextField select label="Rol" fullWidth {...field}>
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="docente">Docente</MenuItem>
+                <MenuItem value="secretario">Secretario</MenuItem>
               </TextField>
             )}
           />
@@ -209,12 +280,42 @@ export default function AuthUsers() {
               </TextField>
             )}
           />
+
           <TextField
             label="Contraseña"
             type="password"
             fullWidth
             helperText={editing ? "Dejar vacío para no cambiar" : ""}
             {...register("password")}
+          />
+
+          {/* ========== PERSONA EXISTENTE (Opcional) ========== */}
+          <Typography variant="subtitle2" sx={{ mt: 3, fontWeight: 600 }}>
+            👤 Vincular a Persona (Opcional)
+          </Typography>
+
+          <Controller
+            name="personaId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <TextField
+                  select
+                  label="Persona"
+                  fullWidth
+                  {...field}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message || "Dejar en blanco si prefieres crear sin persona"}
+                >
+                  <MenuItem value="">-- Sin vincular --</MenuItem>
+                  {personas.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.apellido}, {p.nombre} (DNI: {p.dni})
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </>
+            )}
           />
         </DialogContent>
 
