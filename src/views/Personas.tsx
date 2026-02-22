@@ -179,7 +179,7 @@ export default function Personas() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <PageHeader title="Personas" trail={["Inicio", "Personas"]} />
+        <PageHeader title="Docentes" trail={["Inicio", "Docentes"]} />
       </Grid>
 
       <Grid item xs={12}>
@@ -192,7 +192,7 @@ export default function Personas() {
             }}
           >
             <Typography variant="h6" fontWeight={600}>
-              Listado de Personas
+              Listado de Docentes
             </Typography>
             <Button
               variant="contained"

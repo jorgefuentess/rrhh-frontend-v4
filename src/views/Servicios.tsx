@@ -255,7 +255,7 @@ export default function Servicios() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <PageHeader title="Servicios" trail={["Inicio", "Servicios"]} />
+        <PageHeader title="Servicios Docentes" trail={["Inicio", "Servicios Docentes"]} />
       </Grid>
 
       <Grid item xs={12}>

@@ -15,13 +15,13 @@ export const menuItems: MenuItem[] = [
     allowedRoles: [ROLES.ADMIN, ROLES.SECRETARIO, ROLES.DOCENTE],
   },
   {
-    text: "Personas",
+    text: "Docentes",
     iconName: "Group",
     path: "/personas",
     allowedRoles: [ROLES.ADMIN, ROLES.SECRETARIO],
   },
   {
-    text: "Servicios",
+    text: "Servicios Docentes",
     iconName: "WorkHistory",
     path: "/servicios",
     allowedRoles: [ROLES.ADMIN, ROLES.SECRETARIO],
