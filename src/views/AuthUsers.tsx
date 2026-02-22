@@ -86,16 +86,9 @@ export default function AuthUsers() {
       {
         field: "actions",
         headerName: "Acciones",
-        width: 280,
+        width: 200,
         renderCell: (params) => (
           <div style={{ display: "flex", gap: 8 }}>
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => onCreate()}
-            >
-              Nuevo
-            </Button>
             <Button
               size="small"
               variant="outlined"
@@ -195,6 +188,20 @@ export default function AuthUsers() {
 
       <Grid item xs={12}>
         <SectionCard>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <Typography variant="h6">Listado de Usuarios</Typography>
+            <Button variant="contained" onClick={onCreate}>
+              + Nuevo Usuario
+            </Button>
+          </div>
+
           <div style={{ height: 560, width: "100%" }}>
             <DataGrid
               rows={rows.map((r) => ({ id: r.id, ...r }))}
@@ -205,15 +212,6 @@ export default function AuthUsers() {
               }}
               pageSizeOptions={[5, 10, 20]}
             />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: 12,
-            }}
-          >
           </div>
         </SectionCard>
       </Grid>
