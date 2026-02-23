@@ -32,6 +32,12 @@ type Persona = {
   cuil: string;
   fechaNacimiento?: string;
   direccion?: string;
+  codigoPostal?: string;
+  provincia?: string;
+  calle?: string;
+  numero?: string;
+  piso?: string;
+  dpto?: string;
   telefono?: string;
   email?: string;
   obraSocial?: string;
@@ -53,6 +59,7 @@ export default function Personas() {
     cuil: "",
     fechaNacimiento: "",
     direccion: "",
+    codigoPostal: "",
     telefonoCelular: "",
     email: "",
     obraSocial: "",
@@ -79,6 +86,20 @@ export default function Personas() {
   const [openDetails, setOpenDetails] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
   const [editing, setEditing] = useState<Persona | null>(null);
+
+  const direccionDetalle =
+    selectedPersona?.direccion ||
+    [
+      selectedPersona?.provincia,
+      selectedPersona?.calle,
+      selectedPersona?.numero,
+      selectedPersona?.piso,
+      selectedPersona?.dpto,
+    ]
+      .filter(Boolean)
+      .join(" ") ||
+    "-";
+  const codigoPostalDetalle = selectedPersona?.codigoPostal || "-";
 
   const load = async () => {
     const res = await api.get("/nodocente");
@@ -255,6 +276,10 @@ export default function Personas() {
               label="Dirección (Prov. – calle – N° – piso – dpto.)"
               {...register("direccion")}
             />
+            <TextField
+              label="Código Postal"
+              {...register("codigoPostal")}
+            />
             <TextField label="Teléfono" {...register("telefonoCelular")} />
             <TextField label="Email" type="email" {...register("email")} />
             <TextField label="Obra Social" {...register("obraSocial")} />
@@ -360,6 +385,18 @@ export default function Personas() {
                   Email:
                 </Typography>
                 <Typography variant="body1">{selectedPersona?.email || "-"}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Dirección:
+                </Typography>
+                <Typography variant="body1">{direccionDetalle}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Código Postal:
+                </Typography>
+                <Typography variant="body1">{codigoPostalDetalle}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="subtitle2" color="text.secondary">
