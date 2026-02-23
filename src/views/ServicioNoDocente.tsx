@@ -32,6 +32,7 @@ type Servicio = {
   cantHs: number;
   caracter: string;
   fechaToma: string;
+  boleta?: number;
 };
 
 type CatNivel = { id: number; nombre: string };
@@ -51,6 +52,7 @@ export default function ServicioNoDocente() {
     cantHs: 0,
     caracter: "Interino",
     fechaToma: "",
+    boleta: 0,
   };
   const {
     register,
@@ -130,6 +132,7 @@ export default function ServicioNoDocente() {
       cantHs: data.cantHs,
       caracter: data.caracter,
       fechaToma: data.fechaToma,
+      boleta: data.boleta ? Number(data.boleta) : null,
     };
     
     console.log("body a enviar:", body);
@@ -152,6 +155,7 @@ export default function ServicioNoDocente() {
     reset({
       ...row,
       user: { id: row.noDocente?.id || "" },
+      boleta: row.boleta ?? 0,
     });
     // Asegurar que el valor se setea correctamente
     setValue("user.id", row.noDocente?.id || "");
@@ -179,6 +183,7 @@ export default function ServicioNoDocente() {
       { field: "codigoCargo", headerName: "Código", flex: 1 },
       { field: "cargo", headerName: "Cargo", flex: 1.4 },
       { field: "cantHs", headerName: "Hs", flex: 0.6 },
+      { field: "boleta", headerName: "Boleta", flex: 0.8 },
       {
         field: "actions",
         headerName: "Acciones",
@@ -304,13 +309,18 @@ export default function ServicioNoDocente() {
             <TextField
               label="Cargo"
               {...register("cargo", { required: "Requerido" })}
-            />            <TextField type="number" label="Cant. Hs" {...register("cantHs")} />
-          
+            />
+            <TextField type="number" label="Cant. Hs" {...register("cantHs")} />
             <TextField
               type="date"
               label="Fecha de Toma"
               InputLabelProps={{ shrink: true }}
               {...register("fechaToma", { required: "Requerido" })}
+            />
+            <TextField
+              type="number"
+              label="Boleta de Sueldo"
+              {...register("boleta")}
             />
           </Box>
         </DialogContent>

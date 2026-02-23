@@ -41,6 +41,7 @@ type Servicio = {
   cantHs: number;
   caracter: Caracter;
   fechaToma: string;
+  boleta?: number;
 };
 
 type CatNivel = { id: number; nombre: string };
@@ -60,6 +61,7 @@ export default function Servicios() {
     cantHs: 0,
     caracter: "Interino",
     fechaToma: "",
+    boleta: 0,
   };
 
   const { register, handleSubmit, reset, watch, control, setValue } =
@@ -145,6 +147,7 @@ export default function Servicios() {
       cantHs: Number(data.cantHs),
       caracter: data.caracter,
       fechaToma: data.fechaToma,
+      boleta: data.boleta ? Number(data.boleta) : null,
     };
 
     if (editing?.id) {
@@ -181,6 +184,7 @@ export default function Servicios() {
       cantHs: row.cantHs,
       caracter: row.caracter as Caracter,
       fechaToma: row.fechaToma,
+      boleta: row.boleta ?? 0,
     });
 
     setOpen(true);
@@ -266,6 +270,7 @@ export default function Servicios() {
       { field: "puntos", headerName: "Puntos", flex: 0.8 },
       { field: "cantHs", headerName: "Hs", flex: 0.6 },
       { field: "caracter", headerName: "Carácter", flex: 1 },
+      { field: "boleta", headerName: "Boleta", flex: 0.8 },
       ...(filtro !== "activos" ? [
         {
           field: "fechaBaja",
@@ -481,6 +486,11 @@ export default function Servicios() {
               label="Fecha de Toma"
               InputLabelProps={{ shrink: true }}
               {...register("fechaToma")}
+            />
+            <TextField
+              type="number"
+              label="Boleta de Sueldo"
+              {...register("boleta")}
             />
           </Box>
         </DialogContent>
