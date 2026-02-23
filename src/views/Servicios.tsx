@@ -189,6 +189,22 @@ export default function Servicios() {
   const columns = useMemo<GridColDef[]>(
     () => [
       {
+        field: "docente",
+        headerName: "Docente",
+        flex: 1.5,
+        valueGetter: (p) => {
+          const apellido = p.row.user?.apellido || "";
+          const nombre = p.row.user?.nombre || "";
+          return `${apellido} ${nombre}`.trim() || "-";
+        },
+      },
+      {
+        field: "dni",
+        headerName: "DNI",
+        flex: 0.8,
+        valueGetter: (p) => p.row.user?.dni || "-",
+      },
+      {
         field: "nivel",
         headerName: "Nivel",
         flex: 1,
@@ -216,14 +232,6 @@ export default function Servicios() {
         headerName: "Acciones",
         width: 160,
         renderCell: (params) => (
-          // <Button
-          //   size="small"
-          //   variant="outlined"
-          //   onClick={() => onEdit(params.row)}
-          // >
-          //   Editar
-          // </Button>
-
           <div style={{ display: "flex", gap: 8 }}>
             <Button
               size="small"
