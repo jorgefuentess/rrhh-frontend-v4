@@ -80,7 +80,7 @@ export default function ServicioNoDocente() {
   const load = async () => {
     const [servi, u, ns, ss, ms] = await Promise.all([
       api.get("/servicionodocente"),
-      api.get("/users"),
+      api.get("/nodocente"),
       api.get("/catalogos/nivel"),
       api.get("/catalogos/seccion"),
       api.get("/catalogos/materia"),
@@ -111,11 +111,19 @@ export default function ServicioNoDocente() {
   );
 
   const onSubmit = async (data: Servicio) => {
+    console.log("onSubmit data:", data);
+    
+    if (!data.user?.id) {
+      console.error("No se puede guardar: falta el ID del no docente", data);
+      setToast("Error: Debe seleccionar un No Docente");
+      return;
+    }
+
     const body = {
-      user: { id: data.user.id },
-      nivel: { id: Number(data.nivel.id) },
-      seccion: { id: Number(data.seccion?.id) },
-      materia: { id: Number(data.materia?.id) },
+      noDocente: { id: data.user.id },
+      nivel: data.nivel ? { id: Number(data.nivel.id) } : null,
+      seccion: data.seccion ? { id: Number(data.seccion.id) } : null,
+      materia: data.materia ? { id: Number(data.materia.id) } : null,
       codigoCargo: data.codigoCargo,
       cargo: data.cargo,
       puntos: data.puntos,
@@ -123,26 +131,54 @@ export default function ServicioNoDocente() {
       caracter: data.caracter,
       fechaToma: data.fechaToma,
     };
-    await api.post("/servicionodocente", body);
-    setToast("Servicio creado correctamente");
+    
+    console.log("body a enviar:", body);
+    
+    if (editing) {
+      await api.put(`/servicionodocente/${editing.id}`, body);
+      setToast("Servicio actualizado correctamente");
+    } else {
+      await api.post("/servicionodocente", body);
+      setToast("Servicio creado correctamente");
+    }
+    
     setOpen(false);
+    setEditing(null);
     reset();
     load();
   };
   const onEdit = (row: any) => {
     setEditing(row);
-    reset({ ...row });
+    reset({
+      ...row,
+      user: { id: row.noDocente?.id || "" },
+    });
+    // Asegurar que el valor se setea correctamente
+    setValue("user.id", row.noDocente?.id || "");
     setOpen(true);
   };
 
   const columns = useMemo<GridColDef[]>(
     () => [
-     
+      {
+        field: "noDocente",
+        headerName: "No Docente",
+        flex: 1.5,
+        valueGetter: (p) => {
+          const apellido = p.row.noDocente?.apellido || "";
+          const nombre = p.row.noDocente?.nombre || "";
+          return `${apellido} ${nombre}`.trim() || "-";
+        },
+      },
+      {
+        field: "dni",
+        headerName: "DNI",
+        flex: 0.8,
+        valueGetter: (p) => p.row.noDocente?.dni || "-",
+      },
       { field: "codigoCargo", headerName: "Código", flex: 1 },
       { field: "cargo", headerName: "Cargo", flex: 1.4 },
-
       { field: "cantHs", headerName: "Hs", flex: 0.6 },
- 
       {
         field: "actions",
         headerName: "Acciones",
@@ -247,27 +283,20 @@ export default function ServicioNoDocente() {
                 </MenuItem>
               ))}
             </TextField> */}
-            <Controller
-              name="user"
-              control={control}
-              rules={{ required: "Requerido" }}
-              render={({ field }) => (
-                <TextField
-                  select
-                  label="Usuario"
-                  fullWidth
-                  error={!!errors.user?.id}
-                  helperText={errors.user?.message}
-                  {...field}
-                >                  
-                  {users.map((u) => (
-                    <MenuItem key={u.id} value={u.id}>
-                      {u.apellido}, {u.nombre}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
+            <TextField
+              select
+              label="No Docente"
+              {...register("user.id", { required: "Requerido" })}
+              error={!!errors.user?.id}
+              helperText={errors.user?.id?.message}
+              fullWidth
+            >
+              {users.map((u) => (
+                <MenuItem key={u.id} value={u.id}>
+                  {u.apellido}, {u.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               label="Código Cargo"
               {...register("codigoCargo", { required: "Requerido" })}

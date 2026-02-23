@@ -76,6 +76,8 @@ export default function Personas() {
   const [rows, setRows] = useState<Persona[]>([]);
   const [toast, setToast] = useState("");
   const [open, setOpen] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
   const [editing, setEditing] = useState<Persona | null>(null);
 
   const load = async () => {
@@ -105,6 +107,12 @@ export default function Personas() {
     reset({ ...row });
     setOpen(true);
   };
+  
+  const onViewDetails = (row: Persona) => {
+    setSelectedPersona(row);
+    setOpenDetails(true);
+  };
+  
   const onDelete = async (row: Persona) => {
     await api.delete(`/nodocente/${row.id}`);
     setToast("Persona eliminada correctamente");
@@ -113,46 +121,23 @@ export default function Personas() {
 
   const columns = useMemo<GridColDef[]>(
     () => [
-      { field: "legajo", headerName: "Legajo", flex: 0.8 },
+      { field: "dni", headerName: "DNI", width: 120 },
       { field: "apellido", headerName: "Apellido", flex: 1 },
       { field: "nombre", headerName: "Nombre", flex: 1 },
-      { field: "dni", headerName: "DNI", flex: 0.8 },
-      { field: "cuil", headerName: "CUIL", flex: 1 },
-      { field: "telefonoCelular", headerName: "Teléfonos", flex: 1 },
-      { field: "email", headerName: "Email", flex: 1.3 },
-      { field: "obraSocial", headerName: "Obra Social", flex: 1 },
-      { field: "sexo", headerName: "Sexo", flex: 0.8 },
-      { field: "estadoCivil", headerName: "Estado Civil", flex: 1 },
-      { field: "titulacion", headerName: "Titulación", flex: 1 },
-      {
-        field: "pension",
-        headerName: "Pensión",
-        flex: 0.7,
-        renderCell: (params) =>
-          params.value ? (
-            <Chip label="Sí" color="success" size="small" />
-          ) : (
-            <Chip label="No" color="default" size="small" />
-          ),
-      },
-      {
-        field: "embargo",
-        headerName: "Embargo",
-        flex: 0.7,
-        renderCell: (params) =>
-          params.value ? (
-            <Chip label="Sí" color="error" size="small" />
-          ) : (
-            <Chip label="No" color="default" size="small" />
-          ),
-      },
       {
         field: "actions",
         headerName: "Acciones",
-        width: 220,
+        width: 300,
         sortable: false,
         renderCell: (params) => (
           <div style={{ display: "flex", gap: 8 }}>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => onViewDetails(params.row)}
+            >
+              Datos
+            </Button>
             <Button
               size="small"
               variant="outlined"
@@ -160,7 +145,6 @@ export default function Personas() {
             >
               Editar
             </Button>
-
             <Button
               size="small"
               variant="outlined"
@@ -237,12 +221,6 @@ export default function Personas() {
         </DialogTitle>
         <DialogContent dividers>
           <Box component="form" sx={{ display: "grid", gap: 2 }}>
-            <TextField
-              label="Legajo"
-              {...register("legajo", { required: "Requerido" })}
-              error={!!errors.legajo}
-              helperText={errors.legajo?.message}
-            />
             <TextField
               label="Apellido"
               {...register("apellido", { required: "Requerido" })}
@@ -335,6 +313,119 @@ export default function Personas() {
         onClose={() => setToast("")}
         message={toast}
       />
+
+      {/* Dialog de Detalles */}
+      <Dialog
+        open={openDetails}
+        onClose={() => setOpenDetails(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Datos del No Docente: {selectedPersona?.apellido}, {selectedPersona?.nombre}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "grid", gap: 2, pt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  DNI:
+                </Typography>
+                <Typography variant="body1">{selectedPersona?.dni || "-"}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  CUIL:
+                </Typography>
+                <Typography variant="body1">{selectedPersona?.cuil || "-"}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Fecha de Nacimiento:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.fechaNacimiento || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Teléfono Celular:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.telefonoCelular || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Email:
+                </Typography>
+                <Typography variant="body1">{selectedPersona?.email || "-"}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Obra Social:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.obraSocial || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Sexo:
+                </Typography>
+                <Typography variant="body1">{selectedPersona?.sexo || "-"}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Estado Civil:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.estadoCivil || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Fecha Inicio Actividad:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.fechaInicioActividad || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Titulación:
+                </Typography>
+                <Typography variant="body1">
+                  {selectedPersona?.titulacion || "-"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Pensión:
+                </Typography>
+                <Chip
+                  label={selectedPersona?.pension ? "Sí" : "No"}
+                  color={selectedPersona?.pension ? "success" : "default"}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Embargo:
+                </Typography>
+                <Chip
+                  label={selectedPersona?.embargo ? "Sí" : "No"}
+                  color={selectedPersona?.embargo ? "error" : "default"}
+                  size="small"
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDetails(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }
