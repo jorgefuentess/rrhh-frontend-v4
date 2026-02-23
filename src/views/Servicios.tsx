@@ -12,6 +12,9 @@ import {
   Snackbar,
   TextField,
   Typography,
+  Tabs,
+  Tab,
+  Chip,
 } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { api } from "../helpers/api";
@@ -70,6 +73,9 @@ export default function Servicios() {
   const [toast, setToast] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Servicio | null>(null);
+  const [filtro, setFiltro] = useState<"activos" | "baja" | "todos">("activos");
+  const [bajaDialog, setBajaDialog] = useState<any>(null);
+  const [motivoBaja, setMotivoBaja] = useState("");
 
   const nivelSel = watch("nivel.id");
   const seccionSel = watch("seccion.id");
@@ -79,8 +85,12 @@ export default function Servicios() {
   ======================= */
 
   const load = async () => {
+    let endpoint = "/servicios";
+    if (filtro === "activos") endpoint = "/servicios?activo=true";
+    else if (filtro === "baja") endpoint = "/servicios?activo=false";
+    
     const [serv, u, n, s, m] = await Promise.all([
-      api.get("/servicios"),
+      api.get(endpoint),
       api.get("/users"),
       api.get("/catalogos/nivel"),
       api.get("/catalogos/seccion"),
@@ -96,7 +106,7 @@ export default function Servicios() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [filtro]);
 
   /* =======================
      SELECTS ENCADENADOS
@@ -177,9 +187,25 @@ export default function Servicios() {
   };
 
   const onDelete = async (row: any) => {
-    console.log(row)
-    await api.delete(`/remove/${row.id}`);
-    setToast("Persona eliminada correctamente");
+    setBajaDialog(row);
+    setMotivoBaja("");
+  };
+
+  const confirmarBaja = async () => {
+    if (!motivoBaja) {
+      setToast("Debe seleccionar un motivo de baja");
+      return;
+    }
+    await api.put(`/servicios/${bajaDialog.id}/baja`, { motivo: motivoBaja });
+    setToast("Servicio dado de baja correctamente");
+    setBajaDialog(null);
+    setMotivoBaja("");
+    load();
+  };
+
+  const darDeAlta = async (row: any) => {
+    await api.put(`/servicios/${row.id}/alta`);
+    setToast("Servicio dado de alta correctamente");
     load();
   };
   /* =======================
@@ -188,6 +214,19 @@ export default function Servicios() {
 
   const columns = useMemo<GridColDef[]>(
     () => [
+      {
+        field: "estado",
+        headerName: "Estado",
+        width: 120,
+        renderCell: (params) => (
+          <Chip
+            label={params.row.activo ? "Activo" : "Baja"}
+            color={params.row.activo ? "success" : "error"}
+            variant={params.row.activo ? "filled" : "filled"}
+            size="small"
+          />
+        ),
+      },
       {
         field: "docente",
         headerName: "Docente",
@@ -227,33 +266,59 @@ export default function Servicios() {
       { field: "puntos", headerName: "Puntos", flex: 0.8 },
       { field: "cantHs", headerName: "Hs", flex: 0.6 },
       { field: "caracter", headerName: "Carácter", flex: 1 },
+      ...(filtro !== "activos" ? [
+        {
+          field: "fechaBaja",
+          headerName: "Fecha Baja",
+          flex: 1,
+        },
+        {
+          field: "motivoBaja",
+          headerName: "Motivo Baja",
+          flex: 1.2,
+        },
+      ] : []),
       {
         field: "actions",
         headerName: "Acciones",
-        width: 160,
+        width: 220,
         renderCell: (params) => (
           <div style={{ display: "flex", gap: 8 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => onEdit(params.row)}
-            >
-              Editar
-            </Button>
+            {params.row.activo && (
+              <>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => onEdit(params.row)}
+                >
+                  Editar
+                </Button>
 
-            <Button
-              size="small"
-              variant="outlined"
-              color="error"
-              onClick={() => onDelete(params.row)}
-            >
-              Eliminar
-            </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => onDelete(params.row)}
+                >
+                  Dar de Baja
+                </Button>
+              </>
+            )}
+            {!params.row.activo && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="success"
+                onClick={() => darDeAlta(params.row)}
+              >
+                Dar de Alta
+              </Button>
+            )}
           </div>
         ),
       },
     ],
-    [],
+    [filtro],
   );
 
   /* =======================
@@ -268,7 +333,7 @@ export default function Servicios() {
 
       <Grid item xs={12}>
         <SectionCard>
-          <Box display="flex" justifyContent="space-between">
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h6">Listado</Typography>
             <Button
               variant="contained"
@@ -282,6 +347,12 @@ export default function Servicios() {
             </Button>
           </Box>
 
+          <Tabs value={filtro} onChange={(_, v) => setFiltro(v)} sx={{ mb: 2 }}>
+            <Tab label="Activos" value="activos" />
+            <Tab label="Dados de Baja" value="baja" />
+            <Tab label="Todos" value="todos" />
+          </Tabs>
+
           <Box mt={2}>
             <ResponsiveDataGrid
               rows={rows.map((r, i) => ({ id: r.id || i, ...r }))}
@@ -292,6 +363,41 @@ export default function Servicios() {
           </Box>
         </SectionCard>
       </Grid>
+
+      {/* Dialog de Baja */}
+      <Dialog
+        open={!!bajaDialog}
+        onClose={() => setBajaDialog(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirmar Baja de Servicio</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" gutterBottom>
+            ¿Está seguro de dar de baja este servicio?
+          </Typography>
+          <TextField
+            select
+            label="Motivo de Baja"
+            value={motivoBaja}
+            onChange={(e) => setMotivoBaja(e.target.value)}
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            <MenuItem value="jubilación">Jubilación</MenuItem>
+            <MenuItem value="renuncia">Renuncia</MenuItem>
+            <MenuItem value="fallecimiento">Fallecimiento</MenuItem>
+            <MenuItem value="despido">Despido</MenuItem>
+            <MenuItem value="otros">Otros</MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBajaDialog(null)}>Cancelar</Button>
+          <Button onClick={confirmarBaja} variant="contained" color="error">
+            Confirmar Baja
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={open}
