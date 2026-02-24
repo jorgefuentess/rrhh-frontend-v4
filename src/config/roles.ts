@@ -13,6 +13,7 @@ export const ROLE_PERMISSIONS: Record<Role, string[]> = {
     "/personas",
     "/servicios",
     "/ddjj",
+    "/recibos",
     "/licencias",
     "/auth-users",
     "/milicencia",
@@ -30,6 +31,7 @@ export const ROLE_PERMISSIONS: Record<Role, string[]> = {
   [ROLES.DOCENTE]: [
     "/ddjj",
     "/milicencia",
+    "/recibos",
   ],
 };
 

@@ -33,6 +33,12 @@ export const menuItems: MenuItem[] = [
     allowedRoles: [ROLES.ADMIN, ROLES.DOCENTE],
   },
   {
+    text: "Recibos de Sueldo",
+    iconName: "Description",
+    path: "/recibos",
+    allowedRoles: [ROLES.ADMIN, ROLES.DOCENTE],
+  },
+  {
     text: "Licencias",
     iconName: "CalendarMonth",
     path: "/licencias",

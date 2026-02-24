@@ -12,6 +12,7 @@ import MiLicencia from "../views/MiLicencia";
 import NoDocente from "../views/NoDocente";
 import ServicioNoDocente from "../views/ServicioNoDocente";
 import NovedadesDelMes from "../views/NovedadesDelMes";
+import RecibosSueldo from "../views/RecibosSueldo";
 import { ROLES } from "../config/roles";
 
 export default function App() {
@@ -114,6 +115,16 @@ export default function App() {
           <ProtectedRoute roles={[ROLES.ADMIN]}>
             <DashboardLayout>
               <NovedadesDelMes />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recibos"
+        element={
+          <ProtectedRoute roles={[ROLES.ADMIN, ROLES.DOCENTE]}>
+            <DashboardLayout>
+              <RecibosSueldo />
             </DashboardLayout>
           </ProtectedRoute>
         }
